@@ -8,6 +8,7 @@ const columns = [
   'Matches Played',
   'Wins',
   'Losses',
+  'points',
   'Run Rate',
 ];
 
@@ -23,7 +24,7 @@ export const PointsTable = ({ handleOnClose }: Props) => {
   }
 
   return (
-    <div className='fixed left-0 right-0 bottom-0 w-full h-3/4 p-4 bg-neutral-700 rounded-t-2xl z-10 overflow-auto'>
+    <div className='fixed left-0 right-0 bottom-0 w-full h-full p-4 bg-neutral-700 rounded-t-2xl z-10 overflow-auto'>
       <div className='relative flex items-center justify-between w-full mb-4'>
         <h3 className='text-2xl text-neutral-300 font-bold'>Points Table</h3>
         <button
@@ -68,6 +69,9 @@ export const PointsTable = ({ handleOnClose }: Props) => {
               </td>
               <td className='p-4 text-lg text-center capitalize truncate'>
                 {item.wins}
+              </td>
+              <td className='p-4 text-lg text-center capitalize truncate'>
+                {item.points}
               </td>
               <td className='p-4 text-lg text-center capitalize truncate'>
                 {item.losses}

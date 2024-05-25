@@ -32,8 +32,15 @@ export const MatchesPage = () => {
     (tournament) => tournament?.id === tournamentId
   );
 
+  const totalMatchesPlayedCount: number = tournamentMatches?.filter(
+    (match) => match?.isMatchPlayed
+  )?.length;
+
   const handleMatchesSyncClick = async () => {
-    if (!tournamentMatches?.length && !!teams?.teams?.length) {
+    if (
+      tournamentMatches?.length === totalMatchesPlayedCount &&
+      !!teams?.teams?.length
+    ) {
       let no: number = 1;
 
       const matches: any = [];
@@ -168,11 +175,11 @@ export const MatchesPage = () => {
 
   useEffect(() => {
     const getQualifiers = async () => {
-      if (!!tournamentMatches?.length && !!pointsTable?.length) {
-        const totalMatchesPlayedCount: number = tournamentMatches.filter(
-          (match) => match.isMatchPlayed
-        ).length;
-
+      if (
+        !!tournamentMatches?.length &&
+        !!totalMatchesPlayedCount &&
+        !!pointsTable?.length
+      ) {
         if (tournamentMatches.length === totalMatchesPlayedCount) {
           const topFourTeams = pointsTable.slice(0, 4);
 
@@ -276,7 +283,7 @@ export const MatchesPage = () => {
     };
 
     getQualifiers();
-  }, [tournamentMatches, pointsTable, setMatches]);
+  }, [tournamentMatches, pointsTable, setMatches, totalMatchesPlayedCount]);
 
   if (!tournament) {
     return null;
@@ -290,7 +297,7 @@ export const MatchesPage = () => {
     <div className='p-4 pb-20'>
       <Header
         title='Matches'
-        isSyncActive
+        isSyncActive={tournamentMatches?.length === totalMatchesPlayedCount}
         handleSyncClick={handleMatchesSyncClick}
       />
 

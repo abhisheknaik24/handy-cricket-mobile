@@ -377,11 +377,11 @@ export const MatchPage = () => {
           )}
 
           {!!teamOneStatus?.length && !!teamTwoStatus?.length && (
-            <div className='grid grid-cols-7 gap-2 mt-20'>
+            <div className='flex flex-wrap items-center justify-around gap-4 w-full mt-20 px-2'>
               {Array.from({ length: 7 }, (_, index) => (
                 <button
                   key={index}
-                  className='w-10 h-10 text-xl border border-neutral-300 rounded-lg active:bg-neutral-700 active:scale-95'
+                  className='w-16 h-16 text-xl border border-neutral-300 rounded-lg active:bg-neutral-700 active:scale-95'
                   onClick={() => handleRunClick(index)}
                 >
                   {index}
