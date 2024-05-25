@@ -1,0 +1,9 @@
+{
+  "tournaments": [
+    {
+      "id": 1,
+      "logo": "https://upload.wikimedia.org/wikipedia/en/thumb/8/89/2024_ICC_Men%27s_T20_World_Cup_logo.svg/200px-2024_ICC_Men%27s_T20_World_Cup_logo.svg.png",
+      "name": "ICC T20 World Cup 2024"
+    }
+  ]
+}

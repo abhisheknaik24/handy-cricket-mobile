@@ -1,0 +1,64 @@
+{
+  "teams": [
+    {
+      "id": 1,
+      "logo": "https://images.icc-cricket.com/image/upload/t_q-best/prd/iwjk0vb7agpa7tyhuzea",
+      "name": "Afghanistan"
+    },
+    {
+      "id": 2,
+      "logo": "https://images.icc-cricket.com/image/upload/t_q-best/prd/h5apsohhlfsn9ydrivoe",
+      "name": "Australia"
+    },
+    {
+      "id": 3,
+      "logo": "https://images.icc-cricket.com/image/upload/t_q-best/prd/jxmhkysemy0gkkmjwmct",
+      "name": "Bangladesh"
+    },
+    {
+      "id": 4,
+      "logo": "https://images.icc-cricket.com/image/upload/t_q-best/prd/pnintojotbm9ll60cczx",
+      "name": "England"
+    },
+    {
+      "id": 5,
+      "logo": "https://images.icc-cricket.com/image/upload/t_q-best/prd/neu91cc4x40lphf6ubgh",
+      "name": "India"
+    },
+    {
+      "id": 6,
+      "logo": "https://images.icc-cricket.com/image/upload/t_q-best/prd/j5p9gymd8zwbdt102sta",
+      "name": "Ireland"
+    },
+    {
+      "id": 7,
+      "logo": "https://images.icc-cricket.com/image/upload/t_q-best/prd/ftjoqz45fxlacmrej5oc",
+      "name": "New Zealand"
+    },
+    {
+      "id": 8,
+      "logo": "https://images.icc-cricket.com/image/upload/t_q-best/prd/iexljg3x5le23ts9xmwl",
+      "name": "Pakistan"
+    },
+    {
+      "id": 9,
+      "logo": "https://images.icc-cricket.com/image/upload/t_q-best/prd/kaefiv6vudqhj1vbqq0h",
+      "name": "South Africa"
+    },
+    {
+      "id": 10,
+      "logo": "https://images.icc-cricket.com/image/upload/t_q-best/prd/jb2iqj3djs8g2jbv25nm",
+      "name": "Sri Lanka"
+    },
+    {
+      "id": 11,
+      "logo": "https://images.icc-cricket.com/image/upload/t_q-best/prd/vwd5gtsu96yeq44kntsv",
+      "name": "West Indies"
+    },
+    {
+      "id": 12,
+      "logo": "https://images.icc-cricket.com/image/upload/t_q-best/prd/vz1jpphfrjvbuowwrrtt",
+      "name": "Zimbabwe"
+    }
+  ]
+}
