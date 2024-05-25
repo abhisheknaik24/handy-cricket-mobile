@@ -36,11 +36,15 @@ export const PointsTable = ({ handleOnClose }: Props) => {
       </div>
       <table className='w-full'>
         <thead className='w-full'>
-          <tr className='bg-neutral-800 border border-neutral-900'>
-            {columns?.map((column) => (
+          <tr className='bg-neutral-800'>
+            {columns?.map((column, index) => (
               <th
                 key={column}
-                className='p-4 text-lg text-center font-semibold capitalize truncate'
+                className={cn(
+                  'p-4 text-lg text-center font-semibold capitalize truncate',
+                  index === 0 && 'rounded-tl-2xl',
+                  index === columns?.length - 1 && 'rounded-tr-2xl'
+                )}
               >
                 {column}
               </th>
@@ -55,7 +59,7 @@ export const PointsTable = ({ handleOnClose }: Props) => {
                 'border',
                 index < 4
                   ? 'bg-yellow-500/50 border-yellow-300'
-                  : 'border-neutral-800'
+                  : 'border-neutral-500'
               )}
             >
               <td className='p-4 text-lg text-center capitalize truncate'>
@@ -71,10 +75,10 @@ export const PointsTable = ({ handleOnClose }: Props) => {
                 {item.wins}
               </td>
               <td className='p-4 text-lg text-center capitalize truncate'>
-                {item.points}
+                {item.losses}
               </td>
               <td className='p-4 text-lg text-center capitalize truncate'>
-                {item.losses}
+                {item.points}
               </td>
               <td className='p-4 text-lg text-center capitalize truncate'>
                 {item.runRate.toFixed(2)}
