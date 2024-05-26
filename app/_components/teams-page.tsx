@@ -1,8 +1,14 @@
 import { cn } from '@/lib/utils';
+import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { memo, useEffect, useState } from 'react';
 import teams from '../../data/teams.json';
-import { Header } from './header';
+import { Loader } from './loader';
+
+const Header = dynamic(() => import('./header').then((mod) => mod?.Header), {
+  loading: () => <Loader />,
+  ssr: false,
+});
 
 export const TeamsPage = memo(function TeamsPage() {
   const [tournamentTeams, setTournamentTeams] = useState<any>(null);

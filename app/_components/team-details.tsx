@@ -47,8 +47,8 @@ export const TeamDetails = memo(function TeamDetails({
           Winner!
         </div>
       )}
-      <div className='relative h-24 w-24 bg-white rounded-full'>
-        <Image src={teamLogo} alt={teamName} className='p-2' fill />
+      <div className='relative h-20 w-20 bg-white rounded-full'>
+        <Image src={teamLogo} alt={teamName} className='p-4' fill />
         {match?.playerTeamId === teamId && (
           <LuUser2 className='absolute bottom-0 left-0 bg-green-500 rounded-full text-4xl p-2 text-white' />
         )}

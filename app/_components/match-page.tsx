@@ -1,9 +1,18 @@
 import { MatchType, MatchesType, useMain } from '@/hooks/use-main-store';
 import { useStorage } from '@/hooks/use-storage';
+import dynamic from 'next/dynamic';
 import { memo, useEffect, useState } from 'react';
 import { GiLaurelsTrophy } from 'react-icons/gi';
 import { MdKeyboardArrowLeft } from 'react-icons/md';
-import { TeamDetails } from './team-details';
+import { Loader } from './loader';
+
+const TeamDetails = dynamic(
+  () => import('./team-details').then((mod) => mod?.TeamDetails),
+  {
+    loading: () => <Loader />,
+    ssr: false,
+  }
+);
 
 export const MatchPage = memo(function MatchPage() {
   const { postStorage } = useStorage();
@@ -15,9 +24,9 @@ export const MatchPage = memo(function MatchPage() {
   const [match, setMatch] = useState<MatchType | null>(null);
 
   const handlePlayerTeamClick = (teamId: number) => {
-    if (!!matchId && !!teamId) {
-      const data: MatchesType = matches.map((item) => {
-        if (item.id === matchId) {
+    if (!!matches?.length && !!matchId && !!teamId) {
+      const data: MatchesType = matches?.map((item) => {
+        if (item?.id === matchId) {
           return {
             ...item,
             playerTeamId: teamId,
@@ -32,27 +41,27 @@ export const MatchPage = memo(function MatchPage() {
   };
 
   const handleTossClick = () => {
-    if (!!matchId && !!match?.playerTeamId) {
-      const matchTeamsIds = [match.teamOneId, match.teamTwoId];
+    if (!!matches?.length && !!matchId && !!match?.playerTeamId) {
+      const matchTeamsIds = [match?.teamOneId, match?.teamTwoId];
 
-      const randomTeamIndex = Math.floor(Math.random() * matchTeamsIds.length);
+      const randomTeamIndex = Math.floor(Math.random() * matchTeamsIds?.length);
 
-      if (matchTeamsIds[randomTeamIndex] !== match.playerTeamId) {
+      if (matchTeamsIds[randomTeamIndex] !== match?.playerTeamId) {
         const toss: ['bat', 'bowl'] = ['bat', 'bowl'];
 
-        const randomTossIndex = Math.floor(Math.random() * toss.length);
+        const randomTossIndex = Math.floor(Math.random() * toss?.length);
 
-        const data: MatchesType = matches.map((item) => {
-          if (item.id === matchId) {
+        const data: MatchesType = matches?.map((item) => {
+          if (item?.id === matchId) {
             return {
               ...item,
               tossWinnerTeamId: matchTeamsIds[randomTeamIndex],
               teamOneStatus:
-                item.teamOneId === item.playerTeamId
+                item?.teamOneId === item?.playerTeamId
                   ? toss[(randomTossIndex + 1) % 2]
                   : toss[randomTossIndex],
               teamTwoStatus:
-                item.teamTwoId === item.playerTeamId
+                item?.teamTwoId === item?.playerTeamId
                   ? toss[(randomTossIndex + 1) % 2]
                   : toss[randomTossIndex],
             };
@@ -63,8 +72,8 @@ export const MatchPage = memo(function MatchPage() {
 
         setMatches(data);
       } else {
-        const data: MatchesType = matches.map((item) => {
-          if (item.id === matchId) {
+        const data: MatchesType = matches?.map((item) => {
+          if (item?.id === matchId) {
             return {
               ...item,
               tossWinnerTeamId: matchTeamsIds[randomTeamIndex],
@@ -82,19 +91,24 @@ export const MatchPage = memo(function MatchPage() {
   };
 
   const handleTossChooseClick = (tossChoose: 'bat' | 'bowl') => {
-    if (!!matchId && !!match?.playerTeamId && !!match?.tossWinnerTeamId) {
-      const data: MatchesType = matches.map((item) => {
-        if (item.id === matchId) {
+    if (
+      !!matches?.length &&
+      !!matchId &&
+      !!match?.playerTeamId &&
+      !!match?.tossWinnerTeamId
+    ) {
+      const data: MatchesType = matches?.map((item) => {
+        if (item?.id === matchId) {
           return {
             ...item,
             teamOneStatus:
-              item.teamOneId === item.playerTeamId
+              item?.teamOneId === item?.playerTeamId
                 ? tossChoose
                 : tossChoose === 'bat'
                 ? 'bowl'
                 : 'bat',
             teamTwoStatus:
-              item.teamTwoId === item.playerTeamId
+              item?.teamTwoId === item?.playerTeamId
                 ? tossChoose
                 : tossChoose === 'bat'
                 ? 'bowl'
@@ -112,30 +126,30 @@ export const MatchPage = memo(function MatchPage() {
   };
 
   const handleRunClick = async (run: number) => {
-    if (!!tournament && !!matchId && !!match) {
+    if (!!tournament && !!matches?.length && !!matchId && !!match) {
       const oppositeTeamRun: number = Math.floor(Math.random() * 7);
 
-      if (match.teamOneStatus === 'bat') {
+      if (match?.teamOneStatus === 'bat') {
         const newTeamOneScore =
           run !== oppositeTeamRun
-            ? match.playerTeamId === match.teamOneId
-              ? match.teamOneScore + run
-              : match.teamOneScore + oppositeTeamRun
-            : match.teamOneScore;
+            ? match?.playerTeamId === match?.teamOneId
+              ? match?.teamOneScore + run
+              : match?.teamOneScore + oppositeTeamRun
+            : match?.teamOneScore;
 
         const newTeamOneWickets =
           run === oppositeTeamRun
-            ? match.teamOneWickets + 1
-            : match.teamOneWickets;
+            ? match?.teamOneWickets + 1
+            : match?.teamOneWickets;
 
-        const newTeamOneBalls = match.teamOneBalls - 1;
+        const newTeamOneBalls = match?.teamOneBalls - 1;
 
         if (
-          match.inning === 'first' &&
+          match?.inning === 'first' &&
           (newTeamOneBalls < 1 || newTeamOneWickets === 10)
         ) {
-          const data: MatchesType = matches.map((item) => {
-            if (item.id === matchId) {
+          const data: MatchesType = matches?.map((item) => {
+            if (item?.id === matchId) {
               return {
                 ...item,
                 inning: 'second',
@@ -152,22 +166,22 @@ export const MatchPage = memo(function MatchPage() {
 
           setMatches(data);
         } else if (
-          match.inning === 'second' &&
-          newTeamOneScore > match.teamTwoScore
+          match?.inning === 'second' &&
+          newTeamOneScore > match?.teamTwoScore
         ) {
-          const data: MatchesType = matches.map((item) => {
-            if (item.id === matchId) {
+          const data: MatchesType = matches?.map((item) => {
+            if (item?.id === matchId) {
               return {
                 ...item,
                 inning: 'over',
                 teamOneScore: newTeamOneScore,
                 teamOneWickets: newTeamOneWickets,
                 teamOneBalls: newTeamOneBalls,
-                teamTwoScore: match.teamTwoScore,
-                teamTwoWickets: match.teamTwoWickets,
-                teamTwoBalls: match.teamTwoBalls,
-                winnerTeamId: item.teamOneId,
-                losserTeamId: item.teamTwoId,
+                teamTwoScore: match?.teamTwoScore,
+                teamTwoWickets: match?.teamTwoWickets,
+                teamTwoBalls: match?.teamTwoBalls,
+                winnerTeamId: item?.teamOneId,
+                losserTeamId: item?.teamTwoId,
                 isMatchPlayed: true,
               };
             }
@@ -175,26 +189,26 @@ export const MatchPage = memo(function MatchPage() {
             return item;
           });
 
-          postStorage(String(tournament.id), data);
+          postStorage(String(tournament?.id), data);
 
           setMatches(data);
         } else if (
-          match.inning === 'second' &&
+          match?.inning === 'second' &&
           (newTeamOneBalls < 1 || newTeamOneWickets === 10)
         ) {
-          const data: MatchesType = matches.map((item) => {
-            if (item.id === matchId) {
+          const data: MatchesType = matches?.map((item) => {
+            if (item?.id === matchId) {
               return {
                 ...item,
                 inning: 'over',
                 teamOneScore: newTeamOneScore,
                 teamOneWickets: newTeamOneWickets,
                 teamOneBalls: newTeamOneBalls,
-                teamTwoScore: match.teamTwoScore,
-                teamTwoWickets: match.teamTwoWickets,
-                teamTwoBalls: match.teamTwoBalls,
-                winnerTeamId: item.teamTwoId,
-                losserTeamId: item.teamOneId,
+                teamTwoScore: match?.teamTwoScore,
+                teamTwoWickets: match?.teamTwoWickets,
+                teamTwoBalls: match?.teamTwoBalls,
+                winnerTeamId: item?.teamTwoId,
+                losserTeamId: item?.teamOneId,
                 isMatchPlayed: true,
               };
             }
@@ -202,12 +216,12 @@ export const MatchPage = memo(function MatchPage() {
             return item;
           });
 
-          postStorage(String(tournament.id), data);
+          postStorage(String(tournament?.id), data);
 
           setMatches(data);
         } else {
-          const data: MatchesType = matches.map((item) => {
-            if (item.id === matchId) {
+          const data: MatchesType = matches?.map((item) => {
+            if (item?.id === matchId) {
               return {
                 ...item,
                 teamOneScore: newTeamOneScore,
@@ -221,27 +235,27 @@ export const MatchPage = memo(function MatchPage() {
 
           setMatches(data);
         }
-      } else if (match.teamTwoStatus === 'bat') {
+      } else if (match?.teamTwoStatus === 'bat') {
         const newTeamTwoScore =
           run !== oppositeTeamRun
-            ? match.playerTeamId === match.teamTwoId
-              ? match.teamTwoScore + run
-              : match.teamTwoScore + oppositeTeamRun
-            : match.teamTwoScore;
+            ? match?.playerTeamId === match?.teamTwoId
+              ? match?.teamTwoScore + run
+              : match?.teamTwoScore + oppositeTeamRun
+            : match?.teamTwoScore;
 
         const newTeamTwoWickets =
           run === oppositeTeamRun
-            ? match.teamTwoWickets + 1
-            : match.teamTwoWickets;
+            ? match?.teamTwoWickets + 1
+            : match?.teamTwoWickets;
 
-        const newTeamTwoBalls = match.teamTwoBalls - 1;
+        const newTeamTwoBalls = match?.teamTwoBalls - 1;
 
         if (
-          match.inning === 'first' &&
+          match?.inning === 'first' &&
           (newTeamTwoBalls < 1 || newTeamTwoWickets === 10)
         ) {
-          const data: MatchesType = matches.map((item) => {
-            if (item.id === matchId) {
+          const data: MatchesType = matches?.map((item) => {
+            if (item?.id === matchId) {
               return {
                 ...item,
                 inning: 'second',
@@ -258,22 +272,22 @@ export const MatchPage = memo(function MatchPage() {
 
           setMatches(data);
         } else if (
-          match.inning === 'second' &&
-          newTeamTwoScore > match.teamOneScore
+          match?.inning === 'second' &&
+          newTeamTwoScore > match?.teamOneScore
         ) {
-          const data: MatchesType = matches.map((item) => {
-            if (item.id === matchId) {
+          const data: MatchesType = matches?.map((item) => {
+            if (item?.id === matchId) {
               return {
                 ...item,
                 inning: 'over',
-                teamOneScore: match.teamOneScore,
-                teamOneWickets: match.teamOneWickets,
-                teamOneBalls: match.teamOneBalls,
+                teamOneScore: match?.teamOneScore,
+                teamOneWickets: match?.teamOneWickets,
+                teamOneBalls: match?.teamOneBalls,
                 teamTwoScore: newTeamTwoScore,
                 teamTwoWickets: newTeamTwoWickets,
                 teamTwoBalls: newTeamTwoBalls,
-                winnerTeamId: item.teamTwoId,
-                losserTeamId: item.teamOneId,
+                winnerTeamId: item?.teamTwoId,
+                losserTeamId: item?.teamOneId,
                 isMatchPlayed: true,
               };
             }
@@ -281,26 +295,26 @@ export const MatchPage = memo(function MatchPage() {
             return item;
           });
 
-          postStorage(String(tournament.id), data);
+          postStorage(String(tournament?.id), data);
 
           setMatches(data);
         } else if (
-          match.inning === 'second' &&
+          match?.inning === 'second' &&
           (newTeamTwoBalls < 1 || newTeamTwoWickets === 10)
         ) {
-          const data: MatchesType = matches.map((item) => {
-            if (item.id === matchId) {
+          const data: MatchesType = matches?.map((item) => {
+            if (item?.id === matchId) {
               return {
                 ...item,
                 inning: 'over',
-                teamOneScore: match.teamOneScore,
-                teamOneWickets: match.teamOneWickets,
-                teamOneBalls: match.teamOneBalls,
+                teamOneScore: match?.teamOneScore,
+                teamOneWickets: match?.teamOneWickets,
+                teamOneBalls: match?.teamOneBalls,
                 teamTwoScore: newTeamTwoScore,
                 teamTwoWickets: newTeamTwoWickets,
                 teamTwoBalls: newTeamTwoBalls,
-                winnerTeamId: item.teamOneId,
-                losserTeamId: item.teamTwoId,
+                winnerTeamId: item?.teamOneId,
+                losserTeamId: item?.teamTwoId,
                 isMatchPlayed: true,
               };
             }
@@ -308,12 +322,12 @@ export const MatchPage = memo(function MatchPage() {
             return item;
           });
 
-          postStorage(String(tournament.id), data);
+          postStorage(String(tournament?.id), data);
 
           setMatches(data);
         } else {
-          const data: MatchesType = matches.map((item) => {
-            if (item.id === matchId) {
+          const data: MatchesType = matches?.map((item) => {
+            if (item?.id === matchId) {
               return {
                 ...item,
                 teamTwoScore: newTeamTwoScore,
@@ -332,14 +346,14 @@ export const MatchPage = memo(function MatchPage() {
   };
 
   const handleSkipClick = async () => {
-    if (!!tournament && !!matchId && !!match) {
-      const matchTeamsIds = [match.teamOneId, match.teamTwoId];
+    if (!!tournament && !!matches?.length && !!matchId && !!match) {
+      const matchTeamsIds = [match?.teamOneId, match?.teamTwoId];
 
-      const randomTeamIndex = Math.floor(Math.random() * matchTeamsIds.length);
+      const randomTeamIndex = Math.floor(Math.random() * matchTeamsIds?.length);
 
       const toss: ['bat', 'bowl'] = ['bat', 'bowl'];
 
-      const randomTossIndex = Math.floor(Math.random() * toss.length);
+      const randomTossIndex = Math.floor(Math.random() * toss?.length);
 
       const teamOneScore: number = Math.floor(Math.random() * 100);
 
@@ -349,8 +363,8 @@ export const MatchPage = memo(function MatchPage() {
 
       const teamTwoWickets: number = Math.floor(Math.random() * 10);
 
-      const data: MatchesType = matches.map((item) => {
-        if (item.id === matchId) {
+      const data: MatchesType = matches?.map((item) => {
+        if (item?.id === matchId) {
           return {
             ...item,
             tossWinnerTeamId: matchTeamsIds[randomTeamIndex],
@@ -364,9 +378,9 @@ export const MatchPage = memo(function MatchPage() {
             teamTwoWickets: teamTwoWickets,
             teamTwoBalls: 0,
             winnerTeamId:
-              teamOneScore < teamTwoScore ? item.teamTwoId : item.teamOneId,
+              teamOneScore < teamTwoScore ? item?.teamTwoId : item?.teamOneId,
             losserTeamId:
-              teamOneScore < teamTwoScore ? item.teamOneId : item.teamTwoId,
+              teamOneScore < teamTwoScore ? item?.teamOneId : item?.teamTwoId,
             isMatchPlayed: true,
           };
         }
@@ -374,7 +388,7 @@ export const MatchPage = memo(function MatchPage() {
         return item;
       });
 
-      postStorage(String(tournament.id), data);
+      postStorage(String(tournament?.id), data);
 
       setMatches(data);
     }
@@ -404,7 +418,7 @@ export const MatchPage = memo(function MatchPage() {
         )}
         <GiLaurelsTrophy className='w-16 h-16 text-6xl text-amber-500' />
         <h3 className='w-full text-lg font-bold capitalize truncate'>
-          {tournament.name}
+          {tournament?.name}
         </h3>
       </div>
 

@@ -2,12 +2,32 @@ import { MatchType, MatchesType, useMain } from '@/hooks/use-main-store';
 import { usePointsTable } from '@/hooks/use-points-table-store';
 import { useStorage } from '@/hooks/use-storage';
 import { cn, shuffleArray } from '@/lib/utils';
+import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { memo, useEffect, useState } from 'react';
 import { MdKeyboardArrowLeft } from 'react-icons/md';
-import { Header } from './header';
-import { MatchPage } from './match-page';
-import { PointsTable } from './points-table';
+import { Loader } from './loader';
+
+const Header = dynamic(() => import('./header').then((mod) => mod?.Header), {
+  loading: () => <Loader />,
+  ssr: false,
+});
+
+const MatchPage = dynamic(
+  () => import('./match-page').then((mod) => mod?.MatchPage),
+  {
+    loading: () => <Loader />,
+    ssr: false,
+  }
+);
+
+const PointsTable = dynamic(
+  () => import('./points-table').then((mod) => mod?.PointsTable),
+  {
+    loading: () => <Loader />,
+    ssr: false,
+  }
+);
 
 export const MatchesPage = memo(function MatchesPage() {
   const { postStorage } = useStorage();
@@ -52,12 +72,12 @@ export const MatchesPage = memo(function MatchesPage() {
           if (teamOne?.id !== teamTwo?.id && !matchExist) {
             tournamentMatches.push({
               id: no,
-              teamOneId: teamOne.id,
-              teamOneLogo: teamOne.logo,
-              teamOneName: teamOne.name,
-              teamTwoId: teamTwo.id,
-              teamTwoLogo: teamTwo.logo,
-              teamTwoName: teamTwo.name,
+              teamOneId: teamOne?.id,
+              teamOneLogo: teamOne?.logo,
+              teamOneName: teamOne?.name,
+              teamTwoId: teamTwo?.id,
+              teamTwoLogo: teamTwo?.logo,
+              teamTwoName: teamTwo?.name,
               matchNo: 0,
               type: 'normal',
               playerTeamId: null,
@@ -90,7 +110,7 @@ export const MatchesPage = memo(function MatchesPage() {
         })
       );
 
-      postStorage(String(tournament.id), data);
+      postStorage(String(tournament?.id), data);
 
       setMatches(data);
     }
@@ -115,24 +135,24 @@ export const MatchesPage = memo(function MatchesPage() {
       !!pointsTable?.length
     ) {
       if (matches?.length === totalMatchesPlayedCount) {
-        const topFourTeams = pointsTable.slice(0, 4);
+        const topFourTeams = pointsTable?.slice(0, 4);
 
-        const semiFinalMatches: MatchesType = matches.filter(
-          (match) => match.type === 'semiFinal'
+        const semiFinalMatches: MatchesType = matches?.filter(
+          (match) => match?.type === 'semiFinal'
         );
 
-        if (!semiFinalMatches.length) {
+        if (!semiFinalMatches?.length) {
           const data: MatchesType = [
             ...matches,
             {
-              id: matches.length + 1,
-              teamOneId: topFourTeams[0].teamId,
-              teamOneLogo: topFourTeams[0].teamLogo,
-              teamOneName: topFourTeams[0].teamName,
-              teamTwoId: topFourTeams[3].teamId,
-              teamTwoLogo: topFourTeams[3].teamLogo,
-              teamTwoName: topFourTeams[3].teamName,
-              matchNo: matches.length + 1,
+              id: matches?.length + 1,
+              teamOneId: topFourTeams?.[0]?.teamId,
+              teamOneLogo: topFourTeams?.[0]?.teamLogo,
+              teamOneName: topFourTeams?.[0]?.teamName,
+              teamTwoId: topFourTeams?.[3]?.teamId,
+              teamTwoLogo: topFourTeams?.[3]?.teamLogo,
+              teamTwoName: topFourTeams?.[3]?.teamName,
+              matchNo: matches?.length + 1,
               type: 'semiFinal',
               playerTeamId: null,
               tossWinnerTeamId: null,
@@ -150,14 +170,14 @@ export const MatchesPage = memo(function MatchesPage() {
               isMatchPlayed: false,
             },
             {
-              id: matches.length + 2,
-              teamOneId: topFourTeams[1].teamId,
-              teamOneLogo: topFourTeams[1].teamLogo,
-              teamOneName: topFourTeams[1].teamName,
-              teamTwoId: topFourTeams[2].teamId,
-              teamTwoLogo: topFourTeams[2].teamLogo,
-              teamTwoName: topFourTeams[2].teamName,
-              matchNo: matches.length + 2,
+              id: matches?.length + 2,
+              teamOneId: topFourTeams?.[1]?.teamId,
+              teamOneLogo: topFourTeams?.[1]?.teamLogo,
+              teamOneName: topFourTeams?.[1]?.teamName,
+              teamTwoId: topFourTeams?.[2]?.teamId,
+              teamTwoLogo: topFourTeams?.[2]?.teamLogo,
+              teamTwoName: topFourTeams?.[2]?.teamName,
+              matchNo: matches?.length + 2,
               type: 'semiFinal',
               playerTeamId: null,
               tossWinnerTeamId: null,
@@ -176,54 +196,54 @@ export const MatchesPage = memo(function MatchesPage() {
             },
           ];
 
-          postStorage(String(tournament.id), data);
+          postStorage(String(tournament?.id), data);
 
           setMatches(data);
         }
 
-        const semiFinalMatchesPlayed: MatchesType = matches.filter(
-          (match) => match.type === 'semiFinal' && match.isMatchPlayed
+        const semiFinalMatchesPlayed: MatchesType = matches?.filter(
+          (match) => match?.type === 'semiFinal' && match?.isMatchPlayed
         );
 
-        const finalMatches: MatchesType = matches.filter(
-          (match) => match.type === 'final'
+        const finalMatches: MatchesType = matches?.filter(
+          (match) => match?.type === 'final'
         );
 
-        if (semiFinalMatchesPlayed && !finalMatches.length) {
+        if (semiFinalMatchesPlayed && !finalMatches?.length) {
           const semiFinalWinnersTeams: MatchesType = matches
-            .filter(
-              (match) => match.type === 'semiFinal' && !!match.winnerTeamId
+            ?.filter(
+              (match) => match?.type === 'semiFinal' && !!match?.winnerTeamId
             )
             ?.reverse();
 
-          if (semiFinalWinnersTeams.length === 2) {
+          if (semiFinalWinnersTeams?.length === 2) {
             const data: MatchesType = [
               ...matches,
               {
-                id: matches.length + 1,
-                teamOneId: semiFinalWinnersTeams[0].winnerTeamId!,
+                id: matches?.length + 1,
+                teamOneId: semiFinalWinnersTeams?.[0]?.winnerTeamId!,
                 teamOneLogo:
-                  semiFinalWinnersTeams[0].teamOneId ===
-                  semiFinalWinnersTeams[0].winnerTeamId
-                    ? semiFinalWinnersTeams[0].teamOneLogo
-                    : semiFinalWinnersTeams[0].teamTwoLogo,
+                  semiFinalWinnersTeams?.[0]?.teamOneId ===
+                  semiFinalWinnersTeams?.[0]?.winnerTeamId
+                    ? semiFinalWinnersTeams?.[0]?.teamOneLogo
+                    : semiFinalWinnersTeams?.[0]?.teamTwoLogo,
                 teamOneName:
-                  semiFinalWinnersTeams[0].teamOneId ===
-                  semiFinalWinnersTeams[0].winnerTeamId
-                    ? semiFinalWinnersTeams[0].teamOneName
-                    : semiFinalWinnersTeams[0].teamTwoName,
-                teamTwoId: semiFinalWinnersTeams[1].winnerTeamId!,
+                  semiFinalWinnersTeams?.[0]?.teamOneId ===
+                  semiFinalWinnersTeams?.[0]?.winnerTeamId
+                    ? semiFinalWinnersTeams?.[0]?.teamOneName
+                    : semiFinalWinnersTeams?.[0]?.teamTwoName,
+                teamTwoId: semiFinalWinnersTeams?.[1]?.winnerTeamId!,
                 teamTwoLogo:
-                  semiFinalWinnersTeams[1].teamOneId ===
-                  semiFinalWinnersTeams[1].winnerTeamId
-                    ? semiFinalWinnersTeams[1].teamOneLogo
-                    : semiFinalWinnersTeams[1].teamTwoLogo,
+                  semiFinalWinnersTeams?.[1]?.teamOneId ===
+                  semiFinalWinnersTeams?.[1]?.winnerTeamId
+                    ? semiFinalWinnersTeams?.[1]?.teamOneLogo
+                    : semiFinalWinnersTeams?.[1]?.teamTwoLogo,
                 teamTwoName:
-                  semiFinalWinnersTeams[1].teamOneId ===
-                  semiFinalWinnersTeams[1].winnerTeamId
-                    ? semiFinalWinnersTeams[1].teamOneName
-                    : semiFinalWinnersTeams[1].teamTwoName,
-                matchNo: matches.length + 1,
+                  semiFinalWinnersTeams?.[1]?.teamOneId ===
+                  semiFinalWinnersTeams?.[1]?.winnerTeamId
+                    ? semiFinalWinnersTeams?.[1]?.teamOneName
+                    : semiFinalWinnersTeams?.[1]?.teamTwoName,
+                matchNo: matches?.length + 1,
                 type: 'final',
                 playerTeamId: null,
                 tossWinnerTeamId: null,
@@ -242,7 +262,7 @@ export const MatchesPage = memo(function MatchesPage() {
               },
             ];
 
-            postStorage(String(tournament.id), data);
+            postStorage(String(tournament?.id), data);
 
             setMatches(data);
           }
@@ -274,7 +294,7 @@ export const MatchesPage = memo(function MatchesPage() {
           <MdKeyboardArrowLeft />
         </button>
         <h3 className='w-1/2 font-bold capitalize truncate'>
-          {tournament.name}
+          {tournament?.name}
         </h3>
         {!!matches?.length && (
           <button
@@ -290,7 +310,11 @@ export const MatchesPage = memo(function MatchesPage() {
         <div className='grid grid-cols-1 gap-2 w-full'>
           {matches
             .sort((a, b) =>
-              a.isMatchPlayed === b.isMatchPlayed ? 0 : a.isMatchPlayed ? 1 : -1
+              a?.isMatchPlayed === b?.isMatchPlayed
+                ? 0
+                : a?.isMatchPlayed
+                ? 1
+                : -1
             )
             .map((match) => (
               <div
