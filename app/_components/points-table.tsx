@@ -18,46 +18,50 @@ const columns = [
 ];
 
 type Props = {
-  handleOnClose: () => void;
+  handlePointsTableClose: () => void;
 };
 
-export const PointsTable = memo(function PointsTable({ handleOnClose }: Props) {
+export const PointsTable = memo(function PointsTable({
+  handlePointsTableClose,
+}: Props) {
   const { tournament, teams, matches } = useMain();
 
   const { pointsTable, setPointsTable } = usePointsTable();
 
   useEffect(() => {
     if (!!tournament && !!teams?.length && !!matches?.length) {
-      const data: PointsTableType = teams.map((team) => {
-        const wins = matches.filter((match) => {
+      const data: PointsTableType = teams?.map((team) => {
+        const wins = matches?.filter((match) => {
           if (
-            (team.id === match.teamOneId || team.id === match.teamTwoId) &&
-            team.id === match.winnerTeamId
+            (team?.id === match?.teamOneId || team?.id === match?.teamTwoId) &&
+            team?.id === match?.winnerTeamId
           )
             return match;
-        }).length;
+        })?.length;
 
         return {
-          teamId: team.id,
-          teamLogo: team.logo,
-          teamName: team.name,
-          totalMatches: matches.filter((match) => {
-            if (team.id === match.teamOneId || team.id === match.teamTwoId)
+          teamId: team?.id,
+          teamLogo: team?.logo,
+          teamName: team?.name,
+          totalMatches: matches?.filter((match) => {
+            if (team?.id === match?.teamOneId || team?.id === match?.teamTwoId)
               return match;
           }).length,
-          matchesPlayed: matches.filter((match) => {
+          matchesPlayed: matches?.filter((match) => {
             if (
-              (team.id === match.teamOneId || team.id === match.teamTwoId) &&
-              match.isMatchPlayed
+              (team?.id === match?.teamOneId ||
+                team?.id === match?.teamTwoId) &&
+              match?.isMatchPlayed
             )
               return match;
           }).length,
           wins: wins,
           points: wins * 2,
-          losses: matches.filter((match) => {
+          losses: matches?.filter((match) => {
             if (
-              (team.id === match.teamOneId || team.id === match.teamTwoId) &&
-              team.id === match.losserTeamId
+              (team?.id === match?.teamOneId ||
+                team?.id === match?.teamTwoId) &&
+              team?.id === match?.losserTeamId
             )
               return match;
           }).length,
@@ -66,23 +70,23 @@ export const PointsTable = memo(function PointsTable({ handleOnClose }: Props) {
       });
 
       data.sort((a, b) => {
-        if (b.points !== a.points) {
-          return b.points - a.points;
+        if (b?.points !== a?.points) {
+          return b?.points - a?.points;
         }
 
-        if (b.wins !== a.wins) {
-          return b.wins - a.wins;
+        if (b?.wins !== a?.wins) {
+          return b?.wins - a?.wins;
         }
 
-        if (a.losses !== b.losses) {
-          return a.losses - b.losses;
+        if (a?.losses !== b?.losses) {
+          return a?.losses - b?.losses;
         }
 
-        if (b.runRate !== a.runRate) {
-          return b.runRate - a.runRate;
+        if (b?.runRate !== a?.runRate) {
+          return b?.runRate - a?.runRate;
         }
 
-        return a.teamName.localeCompare(b.teamName);
+        return a?.teamName?.localeCompare(b?.teamName);
       });
 
       setPointsTable(data);
@@ -99,7 +103,7 @@ export const PointsTable = memo(function PointsTable({ handleOnClose }: Props) {
         <h3 className='text-neutral-300 font-bold'>Points Table</h3>
         <button
           className='fixed right-4 text-lg text-neutral-300'
-          onClick={handleOnClose}
+          onClick={handlePointsTableClose}
         >
           <CgClose />
         </button>
@@ -124,32 +128,32 @@ export const PointsTable = memo(function PointsTable({ handleOnClose }: Props) {
         <tbody className='w-full'>
           {pointsTable.map((item, index) => (
             <tr
-              key={item.teamId}
+              key={item?.teamId}
               className={cn(
                 'bg-neutral-800 border border-neutral-500 active:bg-neutral-800/50',
                 index === 3 && 'border-b border-b-yellow-300'
               )}
             >
               <td className='p-2 text-sm text-center capitalize truncate'>
-                {item.teamName}
+                {item?.teamName}
               </td>
               <td className='p-2 text-sm text-center capitalize truncate'>
-                {item.totalMatches}
+                {item?.totalMatches}
               </td>
               <td className='p-2 text-sm text-center capitalize truncate'>
-                {item.matchesPlayed}
+                {item?.matchesPlayed}
               </td>
               <td className='p-2 text-sm text-center capitalize truncate'>
-                {item.wins}
+                {item?.wins}
               </td>
               <td className='p-2 text-sm text-center capitalize truncate'>
-                {item.losses}
+                {item?.losses}
               </td>
               <td className='p-2 text-sm text-center capitalize truncate'>
-                {item.points}
+                {item?.points}
               </td>
               <td className='p-2 text-sm text-center capitalize truncate'>
-                {item.runRate.toFixed(2)}
+                {item?.runRate?.toFixed(2)}
               </td>
             </tr>
           ))}

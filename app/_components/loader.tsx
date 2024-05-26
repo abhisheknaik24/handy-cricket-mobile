@@ -1,10 +1,10 @@
 import { memo } from 'react';
-import { BiLoader } from 'react-icons/bi';
+import { RiLoader4Fill } from 'react-icons/ri';
 
 export const Loader = memo(function Loader() {
   return (
-    <div className='fixed inset-0 h-full w-full flex items-center justify-center bg-background z-50'>
-      <BiLoader className='text-foreground animate-spin' />
+    <div className='fixed inset-0 h-full w-full flex items-center justify-center bg-neutral-900 z-50'>
+      <RiLoader4Fill className='animate-spin' size={48} />
     </div>
   );
 });

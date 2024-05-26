@@ -1,29 +1,47 @@
 import { TournamentType, useMain } from '@/hooks/use-main-store';
 import { useStorage } from '@/hooks/use-storage';
+import { useVibrate } from '@/hooks/use-vibrate';
+import dynamic from 'next/dynamic';
 import { memo } from 'react';
 import { GiLaurelsTrophy } from 'react-icons/gi';
 import teams from '../../data/teams.json';
 import tournaments from '../../data/tournaments.json';
-import { Header } from './header';
-import { MatchesPage } from './matches-page';
+import { Loader } from './loader';
+
+const Header = dynamic(() => import('./header').then((mod) => mod?.Header), {
+  loading: () => <Loader />,
+  ssr: false,
+});
+
+const MatchesPage = dynamic(
+  () => import('./matches-page').then((mod) => mod?.MatchesPage),
+  {
+    loading: () => <Loader />,
+    ssr: false,
+  }
+);
 
 export const TournamentsPage = memo(function TournamentsPage() {
   const { getStorage } = useStorage();
+
+  const { vibrate } = useVibrate();
 
   const { tournament, setTournament, setTeams, setMatches } = useMain();
 
   const handleTournamentClick = async (tournamentValue: TournamentType) => {
     setTournament(tournamentValue);
 
-    const data = await getStorage(String(tournamentValue.id));
+    const data = await getStorage(String(tournamentValue?.id));
 
-    if (tournamentValue.teams === 'ipl') {
+    if (tournamentValue?.teams === 'ipl') {
       setTeams(teams?.ipl_teams);
     } else {
       setTeams(teams?.international_teams);
     }
 
     setMatches(data);
+
+    vibrate();
   };
 
   if (!!tournament?.id) {

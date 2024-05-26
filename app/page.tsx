@@ -1,9 +1,28 @@
 'use client';
 
 import { useTab } from '@/hooks/use-tab-store';
+import dynamic from 'next/dynamic';
 import { useEffect } from 'react';
-import { TeamsPage } from './_components/teams-page';
-import { TournamentsPage } from './_components/tournaments-page';
+import { Loader } from './_components/loader';
+
+const TournamentsPage = dynamic(
+  () =>
+    import('./_components/tournaments-page').then(
+      (mod) => mod?.TournamentsPage
+    ),
+  {
+    loading: () => <Loader />,
+    ssr: false,
+  }
+);
+
+const TeamsPage = dynamic(
+  () => import('./_components/teams-page').then((mod) => mod?.TeamsPage),
+  {
+    loading: () => <Loader />,
+    ssr: false,
+  }
+);
 
 const HomePage = () => {
   const { tab, setTab } = useTab();
