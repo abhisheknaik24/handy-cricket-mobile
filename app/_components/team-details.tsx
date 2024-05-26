@@ -2,10 +2,11 @@ import { useMain } from '@/hooks/use-main-store';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import { LuCoins, LuUser2 } from 'react-icons/lu';
-import teams from '../../data/teams.json';
 
 type Props = {
   teamId: number;
+  teamLogo: string;
+  teamName: string;
   teamStatus: string | null;
   teamScore: number;
   teamWickets: number;
@@ -16,6 +17,8 @@ type Props = {
 
 export const TeamDetails = ({
   teamId,
+  teamLogo,
+  teamName,
   teamStatus,
   teamScore,
   teamWickets,
@@ -23,26 +26,20 @@ export const TeamDetails = ({
   isWinner,
   isMatchPlayed,
 }: Props) => {
-  const {
-    tournamentId,
-    matches,
-    matchId,
-    playerTeamId,
-    tossWinnerTeamId,
-    setTournamentId,
-    setMatches,
-    setMatchId,
-    setPlayerTeamId,
-  } = useMain();
+  const { playerTeamId, tossWinnerTeamId, setPlayerTeamId } = useMain();
 
   return (
     <div
       className={cn(
         'flex flex-col items-center justify-center gap-2 relative px-2 py-4 rounded-lg',
-        !playerTeamId && !isMatchPlayed && 'border border-green-500'
+        !playerTeamId &&
+          !isMatchPlayed &&
+          'border border-green-500 active:scale-95'
       )}
       role='button'
-      onClick={() => (!playerTeamId ? setPlayerTeamId(teamId) : {})}
+      onClick={() =>
+        !playerTeamId && !isMatchPlayed ? setPlayerTeamId(teamId) : {}
+      }
     >
       {isWinner && (
         <div className='absolute -top-4 text-2xl text-green-500 font-bold'>
@@ -50,12 +47,7 @@ export const TeamDetails = ({
         </div>
       )}
       <div className='relative h-24 w-24 bg-white rounded-full'>
-        <Image
-          src={teams?.teams?.find((team) => team?.id === teamId)?.logo!}
-          alt={teams?.teams?.find((team) => team?.id === teamId)?.name!}
-          className='p-2'
-          fill
-        />
+        <Image src={teamLogo} alt={teamName} className='p-2' fill />
         {playerTeamId === teamId && (
           <LuUser2 className='absolute bottom-0 left-0 bg-green-500 rounded-full text-4xl p-2 text-white' />
         )}
@@ -63,9 +55,7 @@ export const TeamDetails = ({
           <LuCoins className='absolute top-0 right-0 bg-yellow-500 rounded-full text-4xl p-2 text-white z-10' />
         )}
       </div>
-      <p className='text-lg font-bold capitalize truncate'>
-        {teams?.teams?.find((team) => team?.id === teamId)?.name}
-      </p>
+      <p className='text-lg font-bold capitalize truncate'>{teamName}</p>
       {!playerTeamId && !isMatchPlayed && (
         <p className='text-green-300 text-sm'>Select Your Team</p>
       )}

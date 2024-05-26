@@ -1,5 +1,5 @@
 {
-  "teams": [
+  "international_teams": [
     {
       "id": 1,
       "logo": "https://images.icc-cricket.com/image/upload/t_q-best/prd/iwjk0vb7agpa7tyhuzea",
@@ -59,6 +59,58 @@
       "id": 12,
       "logo": "https://images.icc-cricket.com/image/upload/t_q-best/prd/vz1jpphfrjvbuowwrrtt",
       "name": "Zimbabwe"
+    }
+  ],
+  "ipl_teams": [
+    {
+      "id": 1,
+      "logo": "https://ssl.gstatic.com/onebox/media/sports/logos/exZiFUT_GXScTyr358t7SQ_96x96.png",
+      "name": "CSK"
+    },
+    {
+      "id": 2,
+      "logo": "https://ssl.gstatic.com/onebox/media/sports/logos/TjudW-BaNE2HcD_6cOWC7Q_96x96.png",
+      "name": "DC"
+    },
+    {
+      "id": 3,
+      "logo": "https://ssl.gstatic.com/onebox/media/sports/logos/24uPDj4LAP1wpSEGHZWRDQ_96x96.png",
+      "name": "GT"
+    },
+    {
+      "id": 4,
+      "logo": "https://ssl.gstatic.com/onebox/media/sports/logos/kkwGQB9t8WtGPx9WuiBGOw_96x96.png",
+      "name": "KKR"
+    },
+    {
+      "id": 5,
+      "logo": "https://ssl.gstatic.com/onebox/media/sports/logos/b6uyRF-RX56muhQOv1-Z3A_96x96.png",
+      "name": "LSG"
+    },
+    {
+      "id": 6,
+      "logo": "https://ssl.gstatic.com/onebox/media/sports/logos/JTre94vh6WJeLmIL-Dfc1g_96x96.png",
+      "name": "MI"
+    },
+    {
+      "id": 7,
+      "logo": "https://ssl.gstatic.com/onebox/media/sports/logos/HxbhoKfAgDZogey6S9E4bA_96x96.png",
+      "name": "PBKS"
+    },
+    {
+      "id": 8,
+      "logo": "https://ssl.gstatic.com/onebox/media/sports/logos/f958HPOsI1ugsHmwc4piCw_96x96.png",
+      "name": "RCB"
+    },
+    {
+      "id": 9,
+      "logo": "https://ssl.gstatic.com/onebox/media/sports/logos/turpQqyPRIMvuksLiSDSjQ_96x96.png",
+      "name": "RR"
+    },
+    {
+      "id": 10,
+      "logo": "https://ssl.gstatic.com/onebox/media/sports/logos/G9q07ZXPVbPkXOagStz3Yw_96x96.png",
+      "name": "SRH"
     }
   ]
 }

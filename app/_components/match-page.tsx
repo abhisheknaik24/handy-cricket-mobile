@@ -1,12 +1,14 @@
 import { useMain } from '@/hooks/use-main-store';
-import { Preferences } from '@capacitor/preferences';
-import Image from 'next/image';
+import { useStorage } from '@/hooks/use-storage';
 import { useEffect, useState } from 'react';
+import { GiLaurelsTrophy } from 'react-icons/gi';
 import { MdKeyboardArrowLeft } from 'react-icons/md';
 import tournaments from '../../data/tournaments.json';
 import { TeamDetails } from './team-details';
 
 export const MatchPage = () => {
+  const { postStorage } = useStorage();
+
   const {
     tournamentId,
     matches,
@@ -22,10 +24,8 @@ export const MatchPage = () => {
     teamTwoScore,
     teamTwoWickets,
     teamTwoBalls,
-    setTournamentId,
     setMatches,
     setMatchId,
-    setPlayerTeamId,
     setTossWinnerTeamId,
     setInning,
     setTeamsStatus,
@@ -37,7 +37,7 @@ export const MatchPage = () => {
     setTeamTwoBalls,
   } = useMain();
 
-  const [showTossChoose, setShowTossChoose] = useState(false);
+  const [showTossChoose, setShowTossChoose] = useState<Boolean>(false);
 
   const tournament = tournaments?.tournaments?.find(
     (tournament) => tournament?.id === tournamentId
@@ -88,7 +88,7 @@ export const MatchPage = () => {
   };
 
   const handleRunClick = async (run: number) => {
-    if (!!match) {
+    if (!!tournament && !!match) {
       const oppositeTeamRun: number = Math.floor(Math.random() * 7);
 
       if (teamOneStatus === 'bat') {
@@ -139,12 +139,7 @@ export const MatchPage = () => {
               return match;
             });
 
-            await Preferences.set({
-              key: 'matches',
-              value: JSON.stringify({
-                matches: data,
-              }),
-            });
+            postStorage(String(tournament.id), data);
 
             setMatches(data);
           } else if (newTeamOneBalls < 1 || newTeamOneWickets === 10) {
@@ -169,12 +164,7 @@ export const MatchPage = () => {
               return match;
             });
 
-            await Preferences.set({
-              key: 'matches',
-              value: JSON.stringify({
-                matches: data,
-              }),
-            });
+            postStorage(String(tournament.id), data);
 
             setMatches(data);
           }
@@ -227,12 +217,7 @@ export const MatchPage = () => {
               return match;
             });
 
-            await Preferences.set({
-              key: 'matches',
-              value: JSON.stringify({
-                matches: data,
-              }),
-            });
+            postStorage(String(tournament.id), data);
 
             setMatches(data);
           } else if (newTeamTwoBalls < 1 || newTeamTwoWickets === 10) {
@@ -257,17 +242,61 @@ export const MatchPage = () => {
               return match;
             });
 
-            await Preferences.set({
-              key: 'matches',
-              value: JSON.stringify({
-                matches: data,
-              }),
-            });
+            postStorage(String(tournament.id), data);
 
             setMatches(data);
           }
         }
       }
+    }
+  };
+
+  const handleSkipClick = async () => {
+    if (!!tournament && !!match) {
+      const matchTeamsIds = [match.teamOneId, match.teamTwoId];
+
+      const randomTeamIndex = Math.floor(Math.random() * matchTeamsIds.length);
+
+      setTossWinnerTeamId(matchTeamsIds[randomTeamIndex]);
+
+      const toss: ['bat', 'bowl'] = ['bat', 'bowl'];
+
+      const randomTossIndex = Math.floor(Math.random() * toss.length);
+
+      setTeamsStatus(toss[randomTossIndex], toss[(randomTossIndex + 1) % 2]);
+
+      const teamOneScore: number = Math.floor(Math.random() * 100);
+
+      const teamOneWickets: number = Math.floor(Math.random() * 10);
+
+      const teamTwoScore: number = Math.floor(Math.random() * 100);
+
+      const teamTwoWickets: number = Math.floor(Math.random() * 10);
+
+      const data = matches.map((match) => {
+        if (match.id === matchId) {
+          return {
+            ...match,
+            teamOneScore: teamOneScore,
+            teamOneWickets: teamOneWickets,
+            teamOneBalls: 0,
+            teamTwoScore: teamTwoScore,
+            teamTwoWickets: teamTwoWickets,
+            teamTwoBalls: 0,
+            winnerTeamId:
+              teamOneScore < teamTwoScore ? match.teamTwoId : match.teamOneId,
+            losserTeamId:
+              teamOneScore < teamTwoScore ? match.teamOneId : match.teamTwoId,
+            isMatchPlayed: true,
+          };
+        }
+
+        return match;
+      });
+
+      postStorage(String(tournament.id), data);
+
+      setMatches(data);
     }
   };
 
@@ -280,15 +309,7 @@ export const MatchPage = () => {
       setTeamTwoWickets(match.teamTwoWickets);
       setTeamTwoBalls(match.teamTwoBalls);
     }
-  }, [
-    match,
-    setTeamOneBalls,
-    setTeamOneScore,
-    setTeamOneWickets,
-    setTeamTwoBalls,
-    setTeamTwoScore,
-    setTeamTwoWickets,
-  ]);
+  }, [match]);
 
   if (!tournament || !match) {
     return null;
@@ -296,21 +317,16 @@ export const MatchPage = () => {
 
   return (
     <div className='p-4 pb-20'>
-      <div className='flex items-center gap-2 w-full'>
+      <div className='flex items-center justify-start gap-2 w-full'>
         {(!playerTeamId || inning === 'over') && (
           <button className='text-2xl' onClick={() => setMatchId(null)}>
             <MdKeyboardArrowLeft />
           </button>
         )}
-        <div className='relative h-16 w-16 bg-white rounded-full'>
-          <Image
-            src={tournament.logo}
-            alt={tournament.name}
-            className='p-2'
-            fill
-          />
-        </div>
-        <h3 className='text-lg capitalize truncate'>{tournament.name}</h3>
+        <GiLaurelsTrophy className='w-16 h-16 text-6xl text-amber-500' />
+        <h3 className='w-full text-lg font-bold capitalize truncate'>
+          {tournament.name}
+        </h3>
       </div>
 
       <div className='flex items-center justify-between w-full py-4'>
@@ -322,11 +338,21 @@ export const MatchPage = () => {
             #{match?.type}
           </p>
         )}
+        {!match?.isMatchPlayed && !playerTeamId && (
+          <button
+            className='bg-neutral-800 px-4 py-2 rounded-lg text-sm font-semibold active:bg-neutral-800/50 active:scale-95'
+            onClick={handleSkipClick}
+          >
+            Skip
+          </button>
+        )}
       </div>
 
       <div className='flex items-start justify-around w-full py-4'>
         <TeamDetails
           teamId={match?.teamOneId}
+          teamLogo={match?.teamOneLogo}
+          teamName={match?.teamOneName}
           teamStatus={teamOneStatus}
           teamScore={teamOneScore}
           teamWickets={teamOneWickets}
@@ -337,6 +363,8 @@ export const MatchPage = () => {
         <p className='mt-20 text-2xl font-bold'>VS</p>
         <TeamDetails
           teamId={match?.teamTwoId}
+          teamLogo={match?.teamTwoLogo}
+          teamName={match?.teamTwoName}
           teamStatus={teamTwoStatus}
           teamScore={teamTwoScore}
           teamWickets={teamTwoWickets}
@@ -349,7 +377,7 @@ export const MatchPage = () => {
       {!!playerTeamId && !tossWinnerTeamId && (
         <div className='flex items-center justify-center w-full'>
           <button
-            className='bg-yellow-500 px-6 py-2 text-2xl font-semibold rounded-lg active:scale-95 active:bg-yellow-500/50'
+            className='bg-yellow-500 px-6 py-2 text-2xl font-semibold rounded-lg active:bg-yellow-500/50 active:scale-95'
             onClick={handleTossClick}
           >
             Toss
@@ -362,13 +390,13 @@ export const MatchPage = () => {
           {showTossChoose && (
             <div className='flex items-center justify-center gap-2 w-full'>
               <button
-                className='bg-neutral-700 px-6 py-2 font-semibold rounded-lg active:scale-95 active:bg-neutral-700/50'
+                className='bg-neutral-800 px-6 py-2 font-semibold rounded-lg active:bg-neutral-800/50 active:scale-95'
                 onClick={() => handleTossChooseClick('bat')}
               >
                 Bat
               </button>
               <button
-                className='bg-neutral-700 px-6 py-2 font-semibold rounded-lg active:scale-95 active:bg-neutral-700/50'
+                className='bg-neutral-800 px-6 py-2 font-semibold rounded-lg active:bg-neutral-800/50 active:scale-95'
                 onClick={() => handleTossChooseClick('bowl')}
               >
                 Bowl
@@ -381,7 +409,7 @@ export const MatchPage = () => {
               {Array.from({ length: 7 }, (_, index) => (
                 <button
                   key={index}
-                  className='w-16 h-16 text-xl border border-neutral-300 rounded-lg active:bg-neutral-700 active:scale-95'
+                  className='w-16 h-16 text-xl border border-neutral-300 rounded-lg active:bg-neutral-800 active:scale-95'
                   onClick={() => handleRunClick(index)}
                 >
                   {index}

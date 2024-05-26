@@ -3,8 +3,8 @@ import {
   PointsTableType,
   usePointsTable,
 } from '@/hooks/use-points-table-store';
+import { useStorage } from '@/hooks/use-storage';
 import { calculateRunRate, cn, shuffleArray } from '@/lib/utils';
-import { Preferences } from '@capacitor/preferences';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { MdKeyboardArrowLeft } from 'react-icons/md';
@@ -15,18 +15,22 @@ import { MatchPage } from './match-page';
 import { PointsTable } from './points-table';
 
 export const MatchesPage = () => {
+  const { getStorage, postStorage } = useStorage();
+
   const {
     tournamentId,
+    teams: tournamentTeams,
     matches: tournamentMatches,
     matchId,
     setTournamentId,
+    setTeams,
     setMatches,
     setMatchId,
   } = useMain();
 
   const { pointsTable, setPointsTable } = usePointsTable();
 
-  const [showPointsTable, setShowPointsTable] = useState(false);
+  const [showPointsTable, setShowPointsTable] = useState<Boolean>(false);
 
   const tournament = tournaments?.tournaments?.find(
     (tournament) => tournament?.id === tournamentId
@@ -36,17 +40,153 @@ export const MatchesPage = () => {
     (match) => match?.isMatchPlayed
   )?.length;
 
+  const getMatches = async () => {
+    if (!!tournament) {
+      const data = await getStorage(String(tournament.id));
+
+      setMatches(data);
+    }
+  };
+
+  const getQualifiers = async () => {
+    if (
+      !!tournament &&
+      !!tournamentMatches?.length &&
+      !!totalMatchesPlayedCount &&
+      !!pointsTable?.length
+    ) {
+      if (tournamentMatches.length === totalMatchesPlayedCount) {
+        const topFourTeams = pointsTable.slice(0, 4);
+
+        const semiFinalMatches: MatchesType = tournamentMatches.filter(
+          (match) => match.type === 'semiFinal'
+        );
+
+        if (!semiFinalMatches.length) {
+          const data: MatchesType = [
+            ...tournamentMatches,
+            {
+              id: tournamentMatches.length + 1,
+              teamOneId: topFourTeams[0].teamId,
+              teamOneLogo: topFourTeams[0].teamLogo,
+              teamOneName: topFourTeams[0].teamName,
+              teamTwoId: topFourTeams[3].teamId,
+              teamTwoLogo: topFourTeams[3].teamLogo,
+              teamTwoName: topFourTeams[3].teamName,
+              matchNo: tournamentMatches.length + 1,
+              type: 'semiFinal',
+              teamOneScore: 0,
+              teamOneWickets: 0,
+              teamOneBalls: 30,
+              teamTwoScore: 0,
+              teamTwoWickets: 0,
+              teamTwoBalls: 30,
+              winnerTeamId: null,
+              losserTeamId: null,
+              isMatchPlayed: false,
+            },
+            {
+              id: tournamentMatches.length + 2,
+              teamOneId: topFourTeams[1].teamId,
+              teamOneLogo: topFourTeams[1].teamLogo,
+              teamOneName: topFourTeams[1].teamName,
+              teamTwoId: topFourTeams[2].teamId,
+              teamTwoLogo: topFourTeams[2].teamLogo,
+              teamTwoName: topFourTeams[2].teamName,
+              matchNo: tournamentMatches.length + 2,
+              type: 'semiFinal',
+              teamOneScore: 0,
+              teamOneWickets: 0,
+              teamOneBalls: 30,
+              teamTwoScore: 0,
+              teamTwoWickets: 0,
+              teamTwoBalls: 30,
+              winnerTeamId: null,
+              losserTeamId: null,
+              isMatchPlayed: false,
+            },
+          ];
+
+          postStorage(String(tournament.id), data);
+
+          setMatches(data);
+        }
+
+        const semiFinalMatchesPlayed: MatchesType = tournamentMatches.filter(
+          (match) => match.type === 'semiFinal' && match.isMatchPlayed
+        );
+
+        const finalMatches: MatchesType = tournamentMatches.filter(
+          (match) => match.type === 'final'
+        );
+
+        if (semiFinalMatchesPlayed && !finalMatches.length) {
+          const semiFinalWinnersTeams: MatchesType = tournamentMatches.filter(
+            (match) => match.type === 'semiFinal' && !!match.winnerTeamId
+          );
+
+          if (semiFinalWinnersTeams.length === 2) {
+            const data: MatchesType = [
+              ...tournamentMatches,
+              {
+                id: tournamentMatches.length + 1,
+                teamOneId: semiFinalWinnersTeams[0].winnerTeamId!,
+                teamOneLogo:
+                  semiFinalWinnersTeams[0].teamOneId ===
+                  semiFinalWinnersTeams[0].winnerTeamId
+                    ? semiFinalWinnersTeams[0].teamOneLogo
+                    : semiFinalWinnersTeams[0].teamTwoLogo,
+                teamOneName:
+                  semiFinalWinnersTeams[0].teamOneId ===
+                  semiFinalWinnersTeams[0].winnerTeamId
+                    ? semiFinalWinnersTeams[0].teamOneName
+                    : semiFinalWinnersTeams[0].teamTwoName,
+                teamTwoId: semiFinalWinnersTeams[1].winnerTeamId!,
+                teamTwoLogo:
+                  semiFinalWinnersTeams[1].teamOneId ===
+                  semiFinalWinnersTeams[1].winnerTeamId
+                    ? semiFinalWinnersTeams[1].teamOneLogo
+                    : semiFinalWinnersTeams[1].teamTwoLogo,
+                teamTwoName:
+                  semiFinalWinnersTeams[1].teamOneId ===
+                  semiFinalWinnersTeams[1].winnerTeamId
+                    ? semiFinalWinnersTeams[1].teamOneName
+                    : semiFinalWinnersTeams[1].teamTwoName,
+                matchNo: tournamentMatches.length + 1,
+                type: 'final',
+                teamOneScore: 0,
+                teamOneWickets: 0,
+                teamOneBalls: 30,
+                teamTwoScore: 0,
+                teamTwoWickets: 0,
+                teamTwoBalls: 30,
+                winnerTeamId: null,
+                losserTeamId: null,
+                isMatchPlayed: false,
+              },
+            ];
+
+            postStorage(String(tournament.id), data);
+
+            setMatches(data);
+          }
+        }
+      }
+    }
+  };
+
   const handleMatchesSyncClick = async () => {
     if (
+      !!tournament &&
       tournamentMatches?.length === totalMatchesPlayedCount &&
-      !!teams?.teams?.length
+      !!tournamentTeams?.length
     ) {
       let no: number = 1;
 
       const matches: any = [];
 
-      teams.teams.forEach((teamOne) => {
-        teams.teams.forEach((teamTwo) => {
+      tournamentTeams.forEach((teamOne) => {
+        tournamentTeams.forEach((teamTwo) => {
           const matchExist = matches?.find(
             (match: any) =>
               (match?.teamOneId === teamOne?.id &&
@@ -59,7 +199,11 @@ export const MatchesPage = () => {
             matches.push({
               id: no,
               teamOneId: teamOne.id,
+              teamOneLogo: teamOne.logo,
+              teamOneName: teamOne.name,
               teamTwoId: teamTwo.id,
+              teamTwoLogo: teamTwo.logo,
+              teamTwoName: teamTwo.name,
               type: 'normal',
               teamOneScore: 0,
               teamOneWickets: 0,
@@ -86,34 +230,31 @@ export const MatchesPage = () => {
         })
       );
 
-      await Preferences.set({
-        key: 'matches',
-        value: JSON.stringify({
-          matches: data,
-        }),
-      });
+      postStorage(String(tournament.id), data);
 
       setMatches(data);
     }
   };
 
   useEffect(() => {
-    const getMatches = async () => {
-      const ret = await Preferences.get({
-        key: 'matches',
-      });
-
-      const data = await JSON.parse(ret?.value!);
-
-      setMatches(data?.matches);
-    };
-
-    getMatches();
-  }, [setMatches]);
+    if (!!tournament) {
+      if (tournament?.teams === 'ipl') {
+        setTeams(teams?.ipl_teams);
+      } else {
+        setTeams(teams?.international_teams);
+      }
+    }
+  }, [tournament]);
 
   useEffect(() => {
-    if (!!tournamentMatches?.length) {
-      const data: PointsTableType = teams.teams.map((team) => {
+    getMatches();
+
+    getQualifiers();
+  }, []);
+
+  useEffect(() => {
+    if (!!tournamentTeams?.length && !!tournamentMatches?.length) {
+      const data: PointsTableType = tournamentTeams.map((team) => {
         const wins = tournamentMatches.filter((match) => {
           if (
             (team.id === match.teamOneId || team.id === match.teamTwoId) &&
@@ -124,6 +265,7 @@ export const MatchesPage = () => {
 
         return {
           teamId: team.id,
+          teamLogo: team.logo,
           teamName: team.name,
           totalMatches: tournamentMatches.filter((match) => {
             if (team.id === match.teamOneId || team.id === match.teamTwoId)
@@ -171,119 +313,7 @@ export const MatchesPage = () => {
 
       setPointsTable(data);
     }
-  }, [setPointsTable, tournamentMatches]);
-
-  useEffect(() => {
-    const getQualifiers = async () => {
-      if (
-        !!tournamentMatches?.length &&
-        !!totalMatchesPlayedCount &&
-        !!pointsTable?.length
-      ) {
-        if (tournamentMatches.length === totalMatchesPlayedCount) {
-          const topFourTeams = pointsTable.slice(0, 4);
-
-          const semiFinalMatches: MatchesType = tournamentMatches.filter(
-            (match) => match.type === 'semiFinal'
-          );
-
-          if (!semiFinalMatches.length) {
-            const data: MatchesType = [
-              ...tournamentMatches,
-              {
-                id: tournamentMatches.length + 1,
-                teamOneId: topFourTeams[0].teamId,
-                teamTwoId: topFourTeams[3].teamId,
-                matchNo: tournamentMatches.length + 1,
-                type: 'semiFinal',
-                teamOneScore: 0,
-                teamOneWickets: 0,
-                teamOneBalls: 30,
-                teamTwoScore: 0,
-                teamTwoWickets: 0,
-                teamTwoBalls: 30,
-                winnerTeamId: null,
-                losserTeamId: null,
-                isMatchPlayed: false,
-              },
-              {
-                id: tournamentMatches.length + 2,
-                teamOneId: topFourTeams[1].teamId,
-                teamTwoId: topFourTeams[2].teamId,
-                matchNo: tournamentMatches.length + 2,
-                type: 'semiFinal',
-                teamOneScore: 0,
-                teamOneWickets: 0,
-                teamOneBalls: 30,
-                teamTwoScore: 0,
-                teamTwoWickets: 0,
-                teamTwoBalls: 30,
-                winnerTeamId: null,
-                losserTeamId: null,
-                isMatchPlayed: false,
-              },
-            ];
-
-            await Preferences.set({
-              key: 'matches',
-              value: JSON.stringify({
-                matches: data,
-              }),
-            });
-
-            setMatches(data);
-          }
-
-          const semiFinalMatchesPlayed: MatchesType = tournamentMatches.filter(
-            (match) => match.type === 'semiFinal' && match.isMatchPlayed
-          );
-
-          const finalMatches: MatchesType = tournamentMatches.filter(
-            (match) => match.type === 'final'
-          );
-
-          if (semiFinalMatchesPlayed && !finalMatches.length) {
-            const semiFinalWinnersTeams: MatchesType = tournamentMatches.filter(
-              (match) => match.type === 'semiFinal' && !!match.winnerTeamId
-            );
-
-            if (semiFinalWinnersTeams.length === 2) {
-              const data: MatchesType = [
-                ...tournamentMatches,
-                {
-                  id: tournamentMatches.length + 1,
-                  teamOneId: semiFinalWinnersTeams[0].winnerTeamId!,
-                  teamTwoId: semiFinalWinnersTeams[1].winnerTeamId!,
-                  matchNo: tournamentMatches.length + 1,
-                  type: 'final',
-                  teamOneScore: 0,
-                  teamOneWickets: 0,
-                  teamOneBalls: 30,
-                  teamTwoScore: 0,
-                  teamTwoWickets: 0,
-                  teamTwoBalls: 30,
-                  winnerTeamId: null,
-                  losserTeamId: null,
-                  isMatchPlayed: false,
-                },
-              ];
-
-              await Preferences.set({
-                key: 'matches',
-                value: JSON.stringify({
-                  matches: data,
-                }),
-              });
-
-              setMatches(data);
-            }
-          }
-        }
-      }
-    };
-
-    getQualifiers();
-  }, [tournamentMatches, pointsTable, setMatches, totalMatchesPlayedCount]);
+  }, [tournamentTeams, tournamentMatches]);
 
   if (!tournament) {
     return null;
@@ -305,12 +335,12 @@ export const MatchesPage = () => {
         <button className='text-2xl' onClick={() => setTournamentId(null)}>
           <MdKeyboardArrowLeft />
         </button>
-        <h3 className='w-1/2 text-lg font-bold capitalize truncate'>
+        <h3 className='w-1/2 font-bold capitalize truncate'>
           {tournament.name}
         </h3>
         <button
-          className='w-1/2 bg-neutral-800 p-2 rounded-lg truncate active:bg-neutral-800/50'
-          onClick={() => setShowPointsTable(true)}
+          className='w-1/2 bg-neutral-800 p-2 font-semibold rounded-lg truncate active:bg-neutral-800/50 active:scale-95'
+          onClick={() => setShowPointsTable((prev) => !prev)}
         >
           Points Table
         </button>
@@ -326,12 +356,12 @@ export const MatchesPage = () => {
               <div
                 key={match?.id}
                 className={cn(
-                  'flex items-center justify-around relative px-4 pt-10 pb-4 rounded-lg',
+                  'flex items-center justify-around relative px-4 pt-10 pb-4 rounded-lg active:scale-95',
                   match?.isMatchPlayed
-                    ? 'bg-neutral-800'
+                    ? 'bg-neutral-800/50 active:bg-neutral-800'
                     : match?.type !== 'normal'
                     ? 'bg-yellow-500/50 active:bg-yellow-500'
-                    : 'bg-neutral-700 active:bg-neutral-800'
+                    : 'bg-neutral-800 active:bg-neutral-800/50'
                 )}
                 role='button'
                 onClick={() => setMatchId(match?.id)}
@@ -339,68 +369,46 @@ export const MatchesPage = () => {
                 <div className='flex flex-col items-center justify-center gap-2'>
                   <div className='relative h-16 w-16 bg-white rounded-full'>
                     <Image
-                      src={
-                        teams?.teams?.find(
-                          (team) => team?.id === match?.teamOneId
-                        )?.logo!
-                      }
-                      alt={
-                        teams?.teams?.find(
-                          (team) => team?.id === match?.teamOneId
-                        )?.name!
-                      }
-                      className='p-2'
+                      src={match?.teamOneLogo}
+                      alt={match?.teamOneName}
+                      className='p-4'
                       fill
                     />
                   </div>
                   <p
                     className={cn(
                       'text-sm font-bold',
-                      match?.isMatchPlayed &&
-                        (match?.winnerTeamId === match?.teamOneId
+                      match?.isMatchPlayed
+                        ? match?.winnerTeamId === match?.teamOneId
                           ? 'text-green-500'
-                          : 'text-red-500')
+                          : 'text-red-500'
+                        : 'text-neutral-300'
                     )}
                   >
-                    {
-                      teams?.teams?.find(
-                        (team) => team?.id === match?.teamOneId
-                      )?.name
-                    }
+                    {match?.teamOneName}
                   </p>
                 </div>
                 <p className='text-2xl font-bold'>VS</p>
                 <div className='flex flex-col items-center justify-center gap-2'>
                   <div className='relative h-16 w-16 bg-white rounded-full'>
                     <Image
-                      src={
-                        teams?.teams?.find(
-                          (team) => team?.id === match?.teamTwoId
-                        )?.logo!
-                      }
-                      alt={
-                        teams?.teams?.find(
-                          (team) => team?.id === match?.teamTwoId
-                        )?.name!
-                      }
-                      className='p-2'
+                      src={match?.teamTwoLogo}
+                      alt={match?.teamTwoName}
+                      className='p-4'
                       fill
                     />
                   </div>
                   <p
                     className={cn(
                       'text-sm font-bold',
-                      match?.isMatchPlayed &&
-                        (match?.winnerTeamId === match?.teamTwoId
+                      match?.isMatchPlayed
+                        ? match?.winnerTeamId === match?.teamTwoId
                           ? 'text-green-500'
-                          : 'text-red-500')
+                          : 'text-red-500'
+                        : 'text-neutral-300'
                     )}
                   >
-                    {
-                      teams?.teams?.find(
-                        (team) => team?.id === match?.teamTwoId
-                      )?.name
-                    }
+                    {match?.teamTwoName}
                   </p>
                 </div>
                 <>

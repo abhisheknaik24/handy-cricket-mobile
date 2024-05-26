@@ -1,9 +1,19 @@
 import { create } from 'zustand';
 
+export type TeamsType = Array<{
+  id: number;
+  logo: string;
+  name: string;
+}>;
+
 export type MatchesType = Array<{
   id: number;
   teamOneId: number;
+  teamOneLogo: string;
+  teamOneName: string;
   teamTwoId: number;
+  teamTwoLogo: string;
+  teamTwoName: string;
   matchNo: number;
   type: 'normal' | 'semiFinal' | 'final';
   teamOneScore: number;
@@ -19,6 +29,7 @@ export type MatchesType = Array<{
 
 interface MainStore {
   tournamentId: number | null;
+  teams: TeamsType;
   matches: MatchesType;
   matchId: number | null;
   playerTeamId: number | null;
@@ -33,6 +44,7 @@ interface MainStore {
   teamTwoWickets: number;
   teamTwoBalls: number;
   setTournamentId: (tournamentId: number | null) => void;
+  setTeams: (matches: TeamsType) => void;
   setMatches: (matches: MatchesType) => void;
   setMatchId: (tournamentId: number | null) => void;
   setPlayerTeamId: (playerTeamId: number) => void;
@@ -52,6 +64,7 @@ interface MainStore {
 
 export const useMain = create<MainStore>((set) => ({
   tournamentId: null,
+  teams: [],
   matches: [],
   matchId: null,
   playerTeamId: null,
@@ -66,6 +79,7 @@ export const useMain = create<MainStore>((set) => ({
   teamTwoWickets: 0,
   teamTwoBalls: 30,
   setTournamentId: (tournamentId) => set({ tournamentId }),
+  setTeams: (teams) => set({ teams }),
   setMatches: (matches) => set({ matches }),
   setMatchId: (matchId) =>
     set({

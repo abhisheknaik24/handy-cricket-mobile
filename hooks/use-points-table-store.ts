@@ -2,6 +2,7 @@ import { create } from 'zustand';
 
 export type PointsTableType = Array<{
   teamId: number;
+  teamLogo: string;
   teamName: string;
   totalMatches: number;
   matchesPlayed: number;
