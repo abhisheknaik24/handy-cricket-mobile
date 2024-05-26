@@ -1,5 +1,6 @@
 import { TournamentType, useMain } from '@/hooks/use-main-store';
 import { useStorage } from '@/hooks/use-storage';
+import { useVibrate } from '@/hooks/use-vibrate';
 import dynamic from 'next/dynamic';
 import { memo } from 'react';
 import { GiLaurelsTrophy } from 'react-icons/gi';
@@ -23,6 +24,8 @@ const MatchesPage = dynamic(
 export const TournamentsPage = memo(function TournamentsPage() {
   const { getStorage } = useStorage();
 
+  const { vibrate } = useVibrate();
+
   const { tournament, setTournament, setTeams, setMatches } = useMain();
 
   const handleTournamentClick = async (tournamentValue: TournamentType) => {
@@ -37,6 +40,8 @@ export const TournamentsPage = memo(function TournamentsPage() {
     }
 
     setMatches(data);
+
+    vibrate();
   };
 
   if (!!tournament?.id) {

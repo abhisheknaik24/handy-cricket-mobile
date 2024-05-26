@@ -1,5 +1,6 @@
 import { MatchType, MatchesType, useMain } from '@/hooks/use-main-store';
 import { useStorage } from '@/hooks/use-storage';
+import { useVibrate } from '@/hooks/use-vibrate';
 import dynamic from 'next/dynamic';
 import { memo, useEffect, useState } from 'react';
 import { GiLaurelsTrophy } from 'react-icons/gi';
@@ -17,11 +18,19 @@ const TeamDetails = dynamic(
 export const MatchPage = memo(function MatchPage() {
   const { postStorage } = useStorage();
 
+  const { vibrate } = useVibrate();
+
   const { tournament, matches, matchId, setMatches, setMatchId } = useMain();
 
   const [showTossChoose, setShowTossChoose] = useState<Boolean>(false);
 
   const [match, setMatch] = useState<MatchType | null>(null);
+
+  const handleBackClick = () => {
+    setMatchId(null);
+
+    vibrate();
+  };
 
   const handlePlayerTeamClick = (teamId: number) => {
     if (!!matches?.length && !!matchId && !!teamId) {
@@ -37,6 +46,8 @@ export const MatchPage = memo(function MatchPage() {
       });
 
       setMatches(data);
+
+      vibrate();
     }
   };
 
@@ -87,6 +98,8 @@ export const MatchPage = memo(function MatchPage() {
 
         setShowTossChoose(true);
       }
+
+      vibrate();
     }
   };
 
@@ -122,6 +135,8 @@ export const MatchPage = memo(function MatchPage() {
       setMatches(data);
 
       setShowTossChoose(false);
+
+      vibrate();
     }
   };
 
@@ -342,6 +357,8 @@ export const MatchPage = memo(function MatchPage() {
           setMatches(data);
         }
       }
+
+      vibrate();
     }
   };
 
@@ -391,6 +408,8 @@ export const MatchPage = memo(function MatchPage() {
       postStorage(String(tournament?.id), data);
 
       setMatches(data);
+
+      vibrate();
     }
   };
 
@@ -412,7 +431,7 @@ export const MatchPage = memo(function MatchPage() {
     <div className='p-4 pb-20'>
       <div className='flex items-center justify-start gap-2 w-full'>
         {(!match?.playerTeamId || match?.inning === 'over') && (
-          <button className='text-2xl' onClick={() => setMatchId(null)}>
+          <button className='text-2xl' onClick={handleBackClick}>
             <MdKeyboardArrowLeft />
           </button>
         )}

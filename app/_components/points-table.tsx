@@ -18,10 +18,12 @@ const columns = [
 ];
 
 type Props = {
-  handleOnClose: () => void;
+  handlePointsTableClose: () => void;
 };
 
-export const PointsTable = memo(function PointsTable({ handleOnClose }: Props) {
+export const PointsTable = memo(function PointsTable({
+  handlePointsTableClose,
+}: Props) {
   const { tournament, teams, matches } = useMain();
 
   const { pointsTable, setPointsTable } = usePointsTable();
@@ -101,7 +103,7 @@ export const PointsTable = memo(function PointsTable({ handleOnClose }: Props) {
         <h3 className='text-neutral-300 font-bold'>Points Table</h3>
         <button
           className='fixed right-4 text-lg text-neutral-300'
-          onClick={handleOnClose}
+          onClick={handlePointsTableClose}
         >
           <CgClose />
         </button>
