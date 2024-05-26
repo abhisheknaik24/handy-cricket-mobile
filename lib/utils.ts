@@ -16,7 +16,7 @@ export const shuffleArray = (array: any) => {
 };
 
 export const calculateRunRate = (matches: any, team: any): number => {
-  let totalRunsScored: number = matches.reduce((total: number, match: any) => {
+  let totalRuns: number = matches.reduce((total: number, match: any) => {
     let data = 0;
 
     if (team.id === match.teamOneId) {
@@ -30,19 +30,19 @@ export const calculateRunRate = (matches: any, team: any): number => {
     return total + data;
   }, 0);
 
-  let totalOversFaced: number = matches.reduce((total: number, match: any) => {
+  let totalWickets: number = matches.reduce((total: number, match: any) => {
     let data = 0;
 
     if (team.id === match.teamOneId) {
-      data += (match.teamOneBalls || 0) / 6;
+      data += match.teamOneWickets || 0;
     }
 
     if (team.id === match.teamTwoId) {
-      data += (match.teamTwoBalls || 0) / 6;
+      data += match.teamTwoWickets || 0;
     }
 
     return total + data;
   }, 0);
 
-  return totalRunsScored / totalOversFaced;
+  return totalRuns / totalWickets;
 };

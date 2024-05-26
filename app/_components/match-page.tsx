@@ -1,316 +1,411 @@
-import { useMain } from '@/hooks/use-main-store';
-import { Preferences } from '@capacitor/preferences';
-import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { MatchType, MatchesType, useMain } from '@/hooks/use-main-store';
+import { useStorage } from '@/hooks/use-storage';
+import { memo, useEffect, useState } from 'react';
+import { GiLaurelsTrophy } from 'react-icons/gi';
 import { MdKeyboardArrowLeft } from 'react-icons/md';
-import tournaments from '../../data/tournaments.json';
 import { TeamDetails } from './team-details';
 
-export const MatchPage = () => {
-  const {
-    tournamentId,
-    matches,
-    matchId,
-    playerTeamId,
-    tossWinnerTeamId,
-    inning,
-    teamOneStatus,
-    teamTwoStatus,
-    teamOneScore,
-    teamOneWickets,
-    teamOneBalls,
-    teamTwoScore,
-    teamTwoWickets,
-    teamTwoBalls,
-    setTournamentId,
-    setMatches,
-    setMatchId,
-    setPlayerTeamId,
-    setTossWinnerTeamId,
-    setInning,
-    setTeamsStatus,
-    setTeamOneScore,
-    setTeamOneWickets,
-    setTeamOneBalls,
-    setTeamTwoScore,
-    setTeamTwoWickets,
-    setTeamTwoBalls,
-  } = useMain();
+export const MatchPage = memo(function MatchPage() {
+  const { postStorage } = useStorage();
 
-  const [showTossChoose, setShowTossChoose] = useState(false);
+  const { tournament, matches, matchId, setMatches, setMatchId } = useMain();
 
-  const tournament = tournaments?.tournaments?.find(
-    (tournament) => tournament?.id === tournamentId
-  );
+  const [showTossChoose, setShowTossChoose] = useState<Boolean>(false);
 
-  const match = matches?.find((match) => match?.id === matchId);
+  const [match, setMatch] = useState<MatchType | null>(null);
+
+  const handlePlayerTeamClick = (teamId: number) => {
+    if (!!matchId && !!teamId) {
+      const data: MatchesType = matches.map((item) => {
+        if (item.id === matchId) {
+          return {
+            ...item,
+            playerTeamId: teamId,
+          };
+        }
+
+        return item;
+      });
+
+      setMatches(data);
+    }
+  };
 
   const handleTossClick = () => {
-    if (!!match && !!playerTeamId) {
+    if (!!matchId && !!match?.playerTeamId) {
       const matchTeamsIds = [match.teamOneId, match.teamTwoId];
 
       const randomTeamIndex = Math.floor(Math.random() * matchTeamsIds.length);
 
-      setTossWinnerTeamId(matchTeamsIds[randomTeamIndex]);
-
-      if (matchTeamsIds[randomTeamIndex] !== playerTeamId) {
+      if (matchTeamsIds[randomTeamIndex] !== match.playerTeamId) {
         const toss: ['bat', 'bowl'] = ['bat', 'bowl'];
 
         const randomTossIndex = Math.floor(Math.random() * toss.length);
 
-        if (match.teamOneId === playerTeamId) {
-          setTeamsStatus(
-            toss[(randomTossIndex + 1) % 2],
-            toss[randomTossIndex]
-          );
-        } else if (match.teamTwoId === playerTeamId) {
-          setTeamsStatus(
-            toss[randomTossIndex],
-            toss[(randomTossIndex + 1) % 2]
-          );
-        }
+        const data: MatchesType = matches.map((item) => {
+          if (item.id === matchId) {
+            return {
+              ...item,
+              tossWinnerTeamId: matchTeamsIds[randomTeamIndex],
+              teamOneStatus:
+                item.teamOneId === item.playerTeamId
+                  ? toss[(randomTossIndex + 1) % 2]
+                  : toss[randomTossIndex],
+              teamTwoStatus:
+                item.teamTwoId === item.playerTeamId
+                  ? toss[(randomTossIndex + 1) % 2]
+                  : toss[randomTossIndex],
+            };
+          }
+
+          return item;
+        });
+
+        setMatches(data);
       } else {
+        const data: MatchesType = matches.map((item) => {
+          if (item.id === matchId) {
+            return {
+              ...item,
+              tossWinnerTeamId: matchTeamsIds[randomTeamIndex],
+            };
+          }
+
+          return item;
+        });
+
+        setMatches(data);
+
         setShowTossChoose(true);
       }
     }
   };
 
   const handleTossChooseClick = (tossChoose: 'bat' | 'bowl') => {
-    if (!!match && !!playerTeamId && !!tossWinnerTeamId) {
-      if (match.teamOneId === playerTeamId) {
-        setTeamsStatus(tossChoose, tossChoose === 'bat' ? 'bowl' : 'bat');
-      } else if (match.teamTwoId === playerTeamId) {
-        setTeamsStatus(tossChoose === 'bat' ? 'bowl' : 'bat', tossChoose);
-      }
+    if (!!matchId && !!match?.playerTeamId && !!match?.tossWinnerTeamId) {
+      const data: MatchesType = matches.map((item) => {
+        if (item.id === matchId) {
+          return {
+            ...item,
+            teamOneStatus:
+              item.teamOneId === item.playerTeamId
+                ? tossChoose
+                : tossChoose === 'bat'
+                ? 'bowl'
+                : 'bat',
+            teamTwoStatus:
+              item.teamTwoId === item.playerTeamId
+                ? tossChoose
+                : tossChoose === 'bat'
+                ? 'bowl'
+                : 'bat',
+          };
+        }
+
+        return item;
+      });
+
+      setMatches(data);
 
       setShowTossChoose(false);
     }
   };
 
   const handleRunClick = async (run: number) => {
-    if (!!match) {
+    if (!!tournament && !!matchId && !!match) {
       const oppositeTeamRun: number = Math.floor(Math.random() * 7);
 
-      if (teamOneStatus === 'bat') {
+      if (match.teamOneStatus === 'bat') {
         const newTeamOneScore =
           run !== oppositeTeamRun
-            ? playerTeamId === match.teamOneId
-              ? teamOneScore + run
-              : teamOneScore + oppositeTeamRun
-            : teamOneScore;
+            ? match.playerTeamId === match.teamOneId
+              ? match.teamOneScore + run
+              : match.teamOneScore + oppositeTeamRun
+            : match.teamOneScore;
 
         const newTeamOneWickets =
-          run === oppositeTeamRun ? teamOneWickets + 1 : teamOneWickets;
+          run === oppositeTeamRun
+            ? match.teamOneWickets + 1
+            : match.teamOneWickets;
 
-        const newTeamOneBalls = teamOneBalls - 1;
+        const newTeamOneBalls = match.teamOneBalls - 1;
 
-        setTeamOneScore(newTeamOneScore);
+        if (
+          match.inning === 'first' &&
+          (newTeamOneBalls < 1 || newTeamOneWickets === 10)
+        ) {
+          const data: MatchesType = matches.map((item) => {
+            if (item.id === matchId) {
+              return {
+                ...item,
+                inning: 'second',
+                teamOneStatus: 'bowl',
+                teamTwoStatus: 'bat',
+                teamOneScore: newTeamOneScore,
+                teamOneWickets: newTeamOneWickets,
+                teamOneBalls: newTeamOneBalls,
+              };
+            }
 
-        setTeamOneWickets(newTeamOneWickets);
+            return item;
+          });
 
-        setTeamOneBalls(newTeamOneBalls);
+          setMatches(data);
+        } else if (
+          match.inning === 'second' &&
+          newTeamOneScore > match.teamTwoScore
+        ) {
+          const data: MatchesType = matches.map((item) => {
+            if (item.id === matchId) {
+              return {
+                ...item,
+                inning: 'over',
+                teamOneScore: newTeamOneScore,
+                teamOneWickets: newTeamOneWickets,
+                teamOneBalls: newTeamOneBalls,
+                teamTwoScore: match.teamTwoScore,
+                teamTwoWickets: match.teamTwoWickets,
+                teamTwoBalls: match.teamTwoBalls,
+                winnerTeamId: item.teamOneId,
+                losserTeamId: item.teamTwoId,
+                isMatchPlayed: true,
+              };
+            }
 
-        if (inning === 'first') {
-          if (newTeamOneBalls < 1 || newTeamOneWickets === 10) {
-            setInning('second');
+            return item;
+          });
 
-            setTeamsStatus('bowl', 'bat');
-          }
-        } else if (inning === 'second') {
-          if (newTeamOneScore > teamTwoScore) {
-            setInning('over');
+          postStorage(String(tournament.id), data);
 
-            const data = matches.map((match) => {
-              if (match.id === matchId) {
-                return {
-                  ...match,
-                  teamOneScore: newTeamOneScore,
-                  teamOneWickets: newTeamOneWickets,
-                  teamOneBalls: newTeamOneBalls,
-                  teamTwoScore: teamTwoScore,
-                  teamTwoWickets: teamTwoWickets,
-                  teamTwoBalls: teamTwoBalls,
-                  winnerTeamId: match.teamOneId,
-                  losserTeamId: match.teamTwoId,
-                  isMatchPlayed: true,
-                };
-              }
+          setMatches(data);
+        } else if (
+          match.inning === 'second' &&
+          (newTeamOneBalls < 1 || newTeamOneWickets === 10)
+        ) {
+          const data: MatchesType = matches.map((item) => {
+            if (item.id === matchId) {
+              return {
+                ...item,
+                inning: 'over',
+                teamOneScore: newTeamOneScore,
+                teamOneWickets: newTeamOneWickets,
+                teamOneBalls: newTeamOneBalls,
+                teamTwoScore: match.teamTwoScore,
+                teamTwoWickets: match.teamTwoWickets,
+                teamTwoBalls: match.teamTwoBalls,
+                winnerTeamId: item.teamTwoId,
+                losserTeamId: item.teamOneId,
+                isMatchPlayed: true,
+              };
+            }
 
-              return match;
-            });
+            return item;
+          });
 
-            await Preferences.set({
-              key: 'matches',
-              value: JSON.stringify({
-                matches: data,
-              }),
-            });
+          postStorage(String(tournament.id), data);
 
-            setMatches(data);
-          } else if (newTeamOneBalls < 1 || newTeamOneWickets === 10) {
-            setInning('over');
+          setMatches(data);
+        } else {
+          const data: MatchesType = matches.map((item) => {
+            if (item.id === matchId) {
+              return {
+                ...item,
+                teamOneScore: newTeamOneScore,
+                teamOneWickets: newTeamOneWickets,
+                teamOneBalls: newTeamOneBalls,
+              };
+            }
 
-            const data = matches.map((match) => {
-              if (match.id === matchId) {
-                return {
-                  ...match,
-                  teamOneScore: newTeamOneScore,
-                  teamOneWickets: newTeamOneWickets,
-                  teamOneBalls: newTeamOneBalls,
-                  teamTwoScore: teamTwoScore,
-                  teamTwoWickets: teamTwoWickets,
-                  teamTwoBalls: teamTwoBalls,
-                  winnerTeamId: match.teamTwoId,
-                  losserTeamId: match.teamOneId,
-                  isMatchPlayed: true,
-                };
-              }
+            return item;
+          });
 
-              return match;
-            });
-
-            await Preferences.set({
-              key: 'matches',
-              value: JSON.stringify({
-                matches: data,
-              }),
-            });
-
-            setMatches(data);
-          }
+          setMatches(data);
         }
-      } else if (teamTwoStatus === 'bat') {
+      } else if (match.teamTwoStatus === 'bat') {
         const newTeamTwoScore =
           run !== oppositeTeamRun
-            ? playerTeamId === match.teamTwoId
-              ? teamTwoScore + run
-              : teamTwoScore + oppositeTeamRun
-            : teamTwoScore;
+            ? match.playerTeamId === match.teamTwoId
+              ? match.teamTwoScore + run
+              : match.teamTwoScore + oppositeTeamRun
+            : match.teamTwoScore;
 
         const newTeamTwoWickets =
-          run === oppositeTeamRun ? teamTwoWickets + 1 : teamTwoWickets;
+          run === oppositeTeamRun
+            ? match.teamTwoWickets + 1
+            : match.teamTwoWickets;
 
-        const newTeamTwoBalls = teamTwoBalls - 1;
+        const newTeamTwoBalls = match.teamTwoBalls - 1;
 
-        setTeamTwoScore(newTeamTwoScore);
+        if (
+          match.inning === 'first' &&
+          (newTeamTwoBalls < 1 || newTeamTwoWickets === 10)
+        ) {
+          const data: MatchesType = matches.map((item) => {
+            if (item.id === matchId) {
+              return {
+                ...item,
+                inning: 'second',
+                teamOneStatus: 'bat',
+                teamTwoStatus: 'bowl',
+                teamTwoScore: newTeamTwoScore,
+                teamTwoWickets: newTeamTwoWickets,
+                teamTwoBalls: newTeamTwoBalls,
+              };
+            }
 
-        setTeamTwoWickets(newTeamTwoWickets);
+            return item;
+          });
 
-        setTeamTwoBalls(newTeamTwoBalls);
+          setMatches(data);
+        } else if (
+          match.inning === 'second' &&
+          newTeamTwoScore > match.teamOneScore
+        ) {
+          const data: MatchesType = matches.map((item) => {
+            if (item.id === matchId) {
+              return {
+                ...item,
+                inning: 'over',
+                teamOneScore: match.teamOneScore,
+                teamOneWickets: match.teamOneWickets,
+                teamOneBalls: match.teamOneBalls,
+                teamTwoScore: newTeamTwoScore,
+                teamTwoWickets: newTeamTwoWickets,
+                teamTwoBalls: newTeamTwoBalls,
+                winnerTeamId: item.teamTwoId,
+                losserTeamId: item.teamOneId,
+                isMatchPlayed: true,
+              };
+            }
 
-        if (inning === 'first') {
-          if (newTeamTwoBalls < 1 || newTeamTwoWickets === 10) {
-            setInning('second');
+            return item;
+          });
 
-            setTeamsStatus('bat', 'bowl');
-          }
-        } else if (inning === 'second') {
-          if (newTeamTwoScore > teamOneScore) {
-            setInning('over');
+          postStorage(String(tournament.id), data);
 
-            const data = matches.map((match) => {
-              if (match.id === matchId) {
-                return {
-                  ...match,
-                  teamOneScore: teamOneScore,
-                  teamOneWickets: teamOneWickets,
-                  teamOneBalls: teamOneBalls,
-                  teamTwoScore: newTeamTwoScore,
-                  teamTwoWickets: newTeamTwoWickets,
-                  teamTwoBalls: newTeamTwoBalls,
-                  winnerTeamId: match.teamTwoId,
-                  losserTeamId: match.teamOneId,
-                  isMatchPlayed: true,
-                };
-              }
+          setMatches(data);
+        } else if (
+          match.inning === 'second' &&
+          (newTeamTwoBalls < 1 || newTeamTwoWickets === 10)
+        ) {
+          const data: MatchesType = matches.map((item) => {
+            if (item.id === matchId) {
+              return {
+                ...item,
+                inning: 'over',
+                teamOneScore: match.teamOneScore,
+                teamOneWickets: match.teamOneWickets,
+                teamOneBalls: match.teamOneBalls,
+                teamTwoScore: newTeamTwoScore,
+                teamTwoWickets: newTeamTwoWickets,
+                teamTwoBalls: newTeamTwoBalls,
+                winnerTeamId: item.teamOneId,
+                losserTeamId: item.teamTwoId,
+                isMatchPlayed: true,
+              };
+            }
 
-              return match;
-            });
+            return item;
+          });
 
-            await Preferences.set({
-              key: 'matches',
-              value: JSON.stringify({
-                matches: data,
-              }),
-            });
+          postStorage(String(tournament.id), data);
 
-            setMatches(data);
-          } else if (newTeamTwoBalls < 1 || newTeamTwoWickets === 10) {
-            setInning('over');
+          setMatches(data);
+        } else {
+          const data: MatchesType = matches.map((item) => {
+            if (item.id === matchId) {
+              return {
+                ...item,
+                teamTwoScore: newTeamTwoScore,
+                teamTwoWickets: newTeamTwoWickets,
+                teamTwoBalls: newTeamTwoBalls,
+              };
+            }
 
-            const data = matches.map((match) => {
-              if (match.id === matchId) {
-                return {
-                  ...match,
-                  teamOneScore: teamOneScore,
-                  teamOneWickets: teamOneWickets,
-                  teamOneBalls: teamOneBalls,
-                  teamTwoScore: newTeamTwoScore,
-                  teamTwoWickets: newTeamTwoWickets,
-                  teamTwoBalls: newTeamTwoBalls,
-                  winnerTeamId: match.teamOneId,
-                  losserTeamId: match.teamTwoId,
-                  isMatchPlayed: true,
-                };
-              }
+            return item;
+          });
 
-              return match;
-            });
-
-            await Preferences.set({
-              key: 'matches',
-              value: JSON.stringify({
-                matches: data,
-              }),
-            });
-
-            setMatches(data);
-          }
+          setMatches(data);
         }
       }
     }
   };
 
-  useEffect(() => {
-    if (!!match) {
-      setTeamOneScore(match.teamOneScore);
-      setTeamOneWickets(match.teamOneWickets);
-      setTeamOneBalls(match.teamOneBalls);
-      setTeamTwoScore(match.teamTwoScore);
-      setTeamTwoWickets(match.teamTwoWickets);
-      setTeamTwoBalls(match.teamTwoBalls);
-    }
-  }, [
-    match,
-    setTeamOneBalls,
-    setTeamOneScore,
-    setTeamOneWickets,
-    setTeamTwoBalls,
-    setTeamTwoScore,
-    setTeamTwoWickets,
-  ]);
+  const handleSkipClick = async () => {
+    if (!!tournament && !!matchId && !!match) {
+      const matchTeamsIds = [match.teamOneId, match.teamTwoId];
 
-  if (!tournament || !match) {
+      const randomTeamIndex = Math.floor(Math.random() * matchTeamsIds.length);
+
+      const toss: ['bat', 'bowl'] = ['bat', 'bowl'];
+
+      const randomTossIndex = Math.floor(Math.random() * toss.length);
+
+      const teamOneScore: number = Math.floor(Math.random() * 100);
+
+      const teamOneWickets: number = Math.floor(Math.random() * 10);
+
+      const teamTwoScore: number = Math.floor(Math.random() * 100);
+
+      const teamTwoWickets: number = Math.floor(Math.random() * 10);
+
+      const data: MatchesType = matches.map((item) => {
+        if (item.id === matchId) {
+          return {
+            ...item,
+            tossWinnerTeamId: matchTeamsIds[randomTeamIndex],
+            inning: 'over',
+            teamOneStatus: toss[randomTossIndex],
+            teamTwoStatus: toss[(randomTossIndex + 1) % 2],
+            teamOneScore: teamOneScore,
+            teamOneWickets: teamOneWickets,
+            teamOneBalls: 0,
+            teamTwoScore: teamTwoScore,
+            teamTwoWickets: teamTwoWickets,
+            teamTwoBalls: 0,
+            winnerTeamId:
+              teamOneScore < teamTwoScore ? item.teamTwoId : item.teamOneId,
+            losserTeamId:
+              teamOneScore < teamTwoScore ? item.teamOneId : item.teamTwoId,
+            isMatchPlayed: true,
+          };
+        }
+
+        return item;
+      });
+
+      postStorage(String(tournament.id), data);
+
+      setMatches(data);
+    }
+  };
+
+  useEffect(() => {
+    if (!!matches?.length) {
+      const data = matches?.find((item) => item?.id === matchId);
+
+      if (!!data) {
+        setMatch(data);
+      }
+    }
+  }, [matches, matchId]);
+
+  if (!tournament || !matches?.length || !matchId || !match) {
     return null;
   }
 
   return (
     <div className='p-4 pb-20'>
-      <div className='flex items-center gap-2 w-full'>
-        {(!playerTeamId || inning === 'over') && (
+      <div className='flex items-center justify-start gap-2 w-full'>
+        {(!match?.playerTeamId || match?.inning === 'over') && (
           <button className='text-2xl' onClick={() => setMatchId(null)}>
             <MdKeyboardArrowLeft />
           </button>
         )}
-        <div className='relative h-16 w-16 bg-white rounded-full'>
-          <Image
-            src={tournament.logo}
-            alt={tournament.name}
-            className='p-2'
-            fill
-          />
-        </div>
-        <h3 className='text-lg capitalize truncate'>{tournament.name}</h3>
+        <GiLaurelsTrophy className='w-16 h-16 text-6xl text-amber-500' />
+        <h3 className='w-full text-lg font-bold capitalize truncate'>
+          {tournament.name}
+        </h3>
       </div>
 
       <div className='flex items-center justify-between w-full py-4'>
@@ -322,34 +417,46 @@ export const MatchPage = () => {
             #{match?.type}
           </p>
         )}
+        {!match?.isMatchPlayed && !match?.playerTeamId && (
+          <button
+            className='bg-neutral-800 px-4 py-2 rounded-lg text-sm font-semibold active:bg-neutral-800/50 active:scale-95'
+            onClick={handleSkipClick}
+          >
+            Skip
+          </button>
+        )}
       </div>
 
       <div className='flex items-start justify-around w-full py-4'>
         <TeamDetails
           teamId={match?.teamOneId}
-          teamStatus={teamOneStatus}
-          teamScore={teamOneScore}
-          teamWickets={teamOneWickets}
-          teamBalls={teamOneBalls}
-          isWinner={match.winnerTeamId === match?.teamOneId}
-          isMatchPlayed={match.isMatchPlayed}
+          teamLogo={match?.teamOneLogo}
+          teamName={match?.teamOneName}
+          teamStatus={match?.teamOneStatus}
+          teamScore={match?.teamOneScore}
+          teamWickets={match?.teamOneWickets}
+          teamBalls={match?.teamOneBalls}
+          match={match}
+          handlePlayerTeamClick={handlePlayerTeamClick}
         />
         <p className='mt-20 text-2xl font-bold'>VS</p>
         <TeamDetails
           teamId={match?.teamTwoId}
-          teamStatus={teamTwoStatus}
-          teamScore={teamTwoScore}
-          teamWickets={teamTwoWickets}
-          teamBalls={teamTwoBalls}
-          isWinner={match.winnerTeamId === match?.teamTwoId}
-          isMatchPlayed={match.isMatchPlayed}
+          teamLogo={match?.teamTwoLogo}
+          teamName={match?.teamTwoName}
+          teamStatus={match?.teamTwoStatus}
+          teamScore={match?.teamTwoScore}
+          teamWickets={match?.teamTwoWickets}
+          teamBalls={match?.teamTwoBalls}
+          match={match}
+          handlePlayerTeamClick={handlePlayerTeamClick}
         />
       </div>
 
-      {!!playerTeamId && !tossWinnerTeamId && (
+      {!!match?.playerTeamId && !match?.tossWinnerTeamId && (
         <div className='flex items-center justify-center w-full'>
           <button
-            className='bg-yellow-500 px-6 py-2 text-2xl font-semibold rounded-lg active:scale-95 active:bg-yellow-500/50'
+            className='bg-yellow-500 px-6 py-2 text-2xl font-semibold rounded-lg active:bg-yellow-500/50 active:scale-95'
             onClick={handleTossClick}
           >
             Toss
@@ -357,40 +464,43 @@ export const MatchPage = () => {
         </div>
       )}
 
-      {!!playerTeamId && !!tossWinnerTeamId && inning !== 'over' && (
-        <>
-          {showTossChoose && (
-            <div className='flex items-center justify-center gap-2 w-full'>
-              <button
-                className='bg-neutral-700 px-6 py-2 font-semibold rounded-lg active:scale-95 active:bg-neutral-700/50'
-                onClick={() => handleTossChooseClick('bat')}
-              >
-                Bat
-              </button>
-              <button
-                className='bg-neutral-700 px-6 py-2 font-semibold rounded-lg active:scale-95 active:bg-neutral-700/50'
-                onClick={() => handleTossChooseClick('bowl')}
-              >
-                Bowl
-              </button>
-            </div>
-          )}
-
-          {!!teamOneStatus?.length && !!teamTwoStatus?.length && (
-            <div className='flex flex-wrap items-center justify-around gap-4 w-full mt-20 px-2'>
-              {Array.from({ length: 7 }, (_, index) => (
+      {!!match?.playerTeamId &&
+        !!match?.tossWinnerTeamId &&
+        match?.inning !== 'over' && (
+          <>
+            {showTossChoose && (
+              <div className='flex items-center justify-center gap-2 w-full'>
                 <button
-                  key={index}
-                  className='w-16 h-16 text-xl border border-neutral-300 rounded-lg active:bg-neutral-700 active:scale-95'
-                  onClick={() => handleRunClick(index)}
+                  className='bg-neutral-800 px-6 py-2 font-semibold rounded-lg active:bg-neutral-800/50 active:scale-95'
+                  onClick={() => handleTossChooseClick('bat')}
                 >
-                  {index}
+                  Bat
                 </button>
-              ))}
-            </div>
-          )}
-        </>
-      )}
+                <button
+                  className='bg-neutral-800 px-6 py-2 font-semibold rounded-lg active:bg-neutral-800/50 active:scale-95'
+                  onClick={() => handleTossChooseClick('bowl')}
+                >
+                  Bowl
+                </button>
+              </div>
+            )}
+
+            {!!match?.teamOneStatus?.length &&
+              !!match?.teamTwoStatus?.length && (
+                <div className='flex flex-wrap items-center justify-around gap-4 w-full mt-20 px-2'>
+                  {Array.from({ length: 7 }, (_, index) => (
+                    <button
+                      key={index}
+                      className='w-16 h-16 text-xl border border-neutral-300 rounded-lg active:bg-neutral-800 active:scale-95'
+                      onClick={() => handleRunClick(index)}
+                    >
+                      {index}
+                    </button>
+                  ))}
+                </div>
+              )}
+          </>
+        )}
     </div>
   );
-};
+});

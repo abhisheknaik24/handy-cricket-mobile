@@ -1,13 +1,32 @@
-import { useMain } from '@/hooks/use-main-store';
-import Image from 'next/image';
+import { TournamentType, useMain } from '@/hooks/use-main-store';
+import { useStorage } from '@/hooks/use-storage';
+import { memo } from 'react';
+import { GiLaurelsTrophy } from 'react-icons/gi';
+import teams from '../../data/teams.json';
 import tournaments from '../../data/tournaments.json';
 import { Header } from './header';
 import { MatchesPage } from './matches-page';
 
-export const TournamentsPage = () => {
-  const { tournamentId, setTournamentId } = useMain();
+export const TournamentsPage = memo(function TournamentsPage() {
+  const { getStorage } = useStorage();
 
-  if (!!tournamentId) {
+  const { tournament, setTournament, setTeams, setMatches } = useMain();
+
+  const handleTournamentClick = async (tournamentValue: TournamentType) => {
+    setTournament(tournamentValue);
+
+    const data = await getStorage(String(tournamentValue.id));
+
+    if (tournamentValue.teams === 'ipl') {
+      setTeams(teams?.ipl_teams);
+    } else {
+      setTeams(teams?.international_teams);
+    }
+
+    setMatches(data);
+  };
+
+  if (!!tournament?.id) {
     return <MatchesPage />;
   }
 
@@ -20,20 +39,20 @@ export const TournamentsPage = () => {
           {tournaments?.tournaments?.map((tournament) => (
             <div
               key={tournament?.id}
-              className='bg-neutral-700 rounded-lg flex flex-col gap-4 items-center justify-center p-4'
+              className='bg-neutral-800 rounded-lg flex items-center justify-center p-2 active:bg-neutral-800/50 active:scale-95'
               role='button'
-              onClick={() => setTournamentId(tournament?.id)}
+              onClick={() => handleTournamentClick(tournament)}
             >
-              <div className='relative h-24 w-full bg-white'>
-                <Image src={tournament?.logo} alt={tournament?.name} fill />
+              <div className='flex flex-col items-center justify-center gap-4 w-full h-full p-2 border-2 border-neutral-500/50 rounded-lg'>
+                <GiLaurelsTrophy className='w-20 h-20 text-6xl text-amber-500' />
+                <p className='w-full text-sm text-center font-bold uppercase truncate'>
+                  {tournament?.name}
+                </p>
               </div>
-              <p className='text-sm font-bold capitalize truncate w-full'>
-                {tournament?.name}
-              </p>
             </div>
           ))}
         </div>
       )}
     </div>
   );
-};
+});

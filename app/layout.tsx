@@ -17,7 +17,7 @@ const RootLayout = ({ children }: Props) => {
     <html lang='en'>
       <body
         className={cn(
-          'relative w-full h-full min-h-screen text-neutral-100 bg-neutral-900',
+          'relative w-full h-full min-h-screen max-w-screen-md mx-auto text-neutral-100 bg-neutral-900 overflow-x-hidden overflow-y-auto',
           font.className
         )}
       >
