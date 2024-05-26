@@ -1,5 +1,10 @@
-import { usePointsTable } from '@/hooks/use-points-table-store';
-import { cn } from '@/lib/utils';
+import { useMain } from '@/hooks/use-main-store';
+import {
+  PointsTableType,
+  usePointsTable,
+} from '@/hooks/use-points-table-store';
+import { calculateRunRate, cn } from '@/lib/utils';
+import { memo, useEffect } from 'react';
 import { CgClose } from 'react-icons/cg';
 
 const columns = [
@@ -16,8 +21,73 @@ type Props = {
   handleOnClose: () => void;
 };
 
-export const PointsTable = ({ handleOnClose }: Props) => {
-  const { pointsTable } = usePointsTable();
+export const PointsTable = memo(function PointsTable({ handleOnClose }: Props) {
+  const { tournament, teams, matches } = useMain();
+
+  const { pointsTable, setPointsTable } = usePointsTable();
+
+  useEffect(() => {
+    if (!!tournament && !!teams?.length && !!matches?.length) {
+      const data: PointsTableType = teams.map((team) => {
+        const wins = matches.filter((match) => {
+          if (
+            (team.id === match.teamOneId || team.id === match.teamTwoId) &&
+            team.id === match.winnerTeamId
+          )
+            return match;
+        }).length;
+
+        return {
+          teamId: team.id,
+          teamLogo: team.logo,
+          teamName: team.name,
+          totalMatches: matches.filter((match) => {
+            if (team.id === match.teamOneId || team.id === match.teamTwoId)
+              return match;
+          }).length,
+          matchesPlayed: matches.filter((match) => {
+            if (
+              (team.id === match.teamOneId || team.id === match.teamTwoId) &&
+              match.isMatchPlayed
+            )
+              return match;
+          }).length,
+          wins: wins,
+          points: wins * 2,
+          losses: matches.filter((match) => {
+            if (
+              (team.id === match.teamOneId || team.id === match.teamTwoId) &&
+              team.id === match.losserTeamId
+            )
+              return match;
+          }).length,
+          runRate: calculateRunRate(matches, team),
+        };
+      });
+
+      data.sort((a, b) => {
+        if (b.points !== a.points) {
+          return b.points - a.points;
+        }
+
+        if (b.wins !== a.wins) {
+          return b.wins - a.wins;
+        }
+
+        if (a.losses !== b.losses) {
+          return a.losses - b.losses;
+        }
+
+        if (b.runRate !== a.runRate) {
+          return b.runRate - a.runRate;
+        }
+
+        return a.teamName.localeCompare(b.teamName);
+      });
+
+      setPointsTable(data);
+    }
+  }, [tournament, teams, matches, setPointsTable]);
 
   if (!pointsTable?.length) {
     return null;
@@ -87,4 +157,4 @@ export const PointsTable = ({ handleOnClose }: Props) => {
       </table>
     </div>
   );
-};
+});

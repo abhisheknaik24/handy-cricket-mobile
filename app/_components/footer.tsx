@@ -1,9 +1,10 @@
 import { TabType, useTab } from '@/hooks/use-tab-store';
 import { cn } from '@/lib/utils';
+import { memo } from 'react';
 
 const tabs: TabType[] = ['tournaments', 'teams'];
 
-export const Footer = () => {
+export const Footer = memo(function Footer() {
   const { tab, setTab } = useTab();
 
   return (
@@ -22,4 +23,4 @@ export const Footer = () => {
       ))}
     </div>
   );
-};
+});

@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { BiRefresh } from 'react-icons/bi';
 
 type Props = {
@@ -6,7 +7,11 @@ type Props = {
   handleSyncClick?: () => void;
 };
 
-export const Header = ({ title, isSyncActive, handleSyncClick }: Props) => {
+export const Header = memo(function Header({
+  title,
+  isSyncActive,
+  handleSyncClick,
+}: Props) {
   return (
     <div className='flex items-center justify-between'>
       <h1 className='text-4xl font-bold text-neutral-300'>{title}</h1>
@@ -20,4 +25,4 @@ export const Header = ({ title, isSyncActive, handleSyncClick }: Props) => {
       )}
     </div>
   );
-};
+});

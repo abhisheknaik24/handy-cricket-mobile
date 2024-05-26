@@ -1,10 +1,10 @@
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import teams from '../../data/teams.json';
 import { Header } from './header';
 
-export const TeamsPage = () => {
+export const TeamsPage = memo(function TeamsPage() {
   const [tournamentTeams, setTournamentTeams] = useState<any>(null);
 
   const [tournamentTeamsKeys, setTournamentTeamsKeys] = useState<string[]>([]);
@@ -63,4 +63,4 @@ export const TeamsPage = () => {
       )}
     </div>
   );
-};
+});

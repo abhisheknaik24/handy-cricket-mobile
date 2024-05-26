@@ -12,7 +12,7 @@ const HomePage = () => {
     if (!tab?.length) {
       setTab('tournaments');
     }
-  }, [tab]);
+  }, [tab, setTab]);
 
   if (tab === 'tournaments') {
     return <TournamentsPage />;
