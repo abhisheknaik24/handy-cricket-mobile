@@ -18,11 +18,11 @@ export const AddTournament = memo(function AddTournament({
   const [formInput, setFormInput] = useState<{
     name: string;
     teams: string;
-    balls: number;
+    balls: string;
   }>({
     name: '',
     teams: '',
-    balls: 0,
+    balls: '',
   });
 
   const handleOnSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -45,7 +45,7 @@ export const AddTournament = memo(function AddTournament({
           id: data?.length + 1,
           name: formInput.name,
           teams: formInput.teams?.replaceAll(' ', '_'),
-          balls: formInput.balls,
+          balls: Number(formInput.balls),
         },
       ]);
     } else {
@@ -54,7 +54,7 @@ export const AddTournament = memo(function AddTournament({
           id: 1,
           name: formInput.name,
           teams: formInput.teams?.replaceAll(' ', '_'),
-          balls: formInput.balls,
+          balls: Number(formInput.balls),
         },
       ]);
     }
@@ -124,7 +124,7 @@ export const AddTournament = memo(function AddTournament({
             value={formInput.balls}
             placeholder='Balls'
             onChange={(e) =>
-              setFormInput({ ...formInput, balls: Number(e.target.value) })
+              setFormInput({ ...formInput, balls: e.target.value })
             }
           />
         </div>
