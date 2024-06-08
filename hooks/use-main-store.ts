@@ -4,6 +4,7 @@ export type TournamentType = {
   id: number;
   name: string;
   teams: string;
+  balls: number;
 };
 
 export type TeamsType = Array<{

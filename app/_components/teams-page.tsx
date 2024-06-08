@@ -1,4 +1,3 @@
-import { useVibrate } from '@/hooks/use-vibrate';
 import { cn } from '@/lib/utils';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
@@ -12,19 +11,11 @@ const Header = dynamic(() => import('./header').then((mod) => mod?.Header), {
 });
 
 export const TeamsPage = memo(function TeamsPage() {
-  const { vibrate } = useVibrate();
-
   const [tournamentTeams, setTournamentTeams] = useState<any>(null);
 
   const [tournamentTeamsKeys, setTournamentTeamsKeys] = useState<string[]>([]);
 
   const [tournamentTeamsKey, setTournamentTeamsKey] = useState<string>('');
-
-  const handleTournamentTeamsKeyClick = (tournamentTeamsKeyValue: string) => {
-    setTournamentTeamsKey(tournamentTeamsKeyValue);
-
-    vibrate();
-  };
 
   useEffect(() => {
     setTournamentTeams(teams as any);
@@ -53,9 +44,7 @@ export const TeamsPage = memo(function TeamsPage() {
                   ? 'bg-neutral-700'
                   : 'bg-neutral-800'
               )}
-              onClick={() =>
-                handleTournamentTeamsKeyClick(item?.replaceAll(' ', '_'))
-              }
+              onClick={() => setTournamentTeamsKey(item?.replaceAll(' ', '_'))}
             >
               {item}
             </button>

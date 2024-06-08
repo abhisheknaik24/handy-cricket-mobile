@@ -3,17 +3,20 @@
     {
       "id": 1,
       "name": "ICC World Cup",
-      "teams": "international"
+      "teams": "international",
+      "balls": 120
     },
     {
       "id": 2,
       "name": "ICC T20 World Cup",
-      "teams": "international"
+      "teams": "international",
+      "balls": 60
     },
     {
       "id": 3,
       "name": "IPL",
-      "teams": "ipl"
+      "teams": "ipl",
+      "balls": 60
     }
   ]
 }

@@ -50,7 +50,7 @@ export const MatchesPage = memo(function MatchesPage() {
   const [totalMatchesPlayedCount, setTotalMatchesPlayedCount] =
     useState<number>(0);
 
-  const [showPointsTable, setShowPointsTable] = useState<Boolean>(false);
+  const [showPointsTable, setShowPointsTable] = useState<boolean>(false);
 
   const handleBackClick = () => {
     setTournament(null);
@@ -114,10 +114,10 @@ export const MatchesPage = memo(function MatchesPage() {
               teamTwoStatus: null,
               teamOneScore: 0,
               teamOneWickets: 0,
-              teamOneBalls: 30,
+              teamOneBalls: tournament?.balls,
               teamTwoScore: 0,
               teamTwoWickets: 0,
-              teamTwoBalls: 30,
+              teamTwoBalls: tournament?.balls,
               winnerTeamId: null,
               losserTeamId: null,
               isMatchPlayed: false,
@@ -188,10 +188,10 @@ export const MatchesPage = memo(function MatchesPage() {
               teamTwoStatus: null,
               teamOneScore: 0,
               teamOneWickets: 0,
-              teamOneBalls: 30,
+              teamOneBalls: tournament?.balls,
               teamTwoScore: 0,
               teamTwoWickets: 0,
-              teamTwoBalls: 30,
+              teamTwoBalls: tournament?.balls,
               winnerTeamId: null,
               losserTeamId: null,
               isMatchPlayed: false,
@@ -213,10 +213,10 @@ export const MatchesPage = memo(function MatchesPage() {
               teamTwoStatus: null,
               teamOneScore: 0,
               teamOneWickets: 0,
-              teamOneBalls: 30,
+              teamOneBalls: tournament?.balls,
               teamTwoScore: 0,
               teamTwoWickets: 0,
-              teamTwoBalls: 30,
+              teamTwoBalls: tournament?.balls,
               winnerTeamId: null,
               losserTeamId: null,
               isMatchPlayed: false,
@@ -279,10 +279,10 @@ export const MatchesPage = memo(function MatchesPage() {
                 teamTwoStatus: null,
                 teamOneScore: 0,
                 teamOneWickets: 0,
-                teamOneBalls: 30,
+                teamOneBalls: tournament?.balls,
                 teamTwoScore: 0,
                 teamTwoWickets: 0,
-                teamTwoBalls: 30,
+                teamTwoBalls: tournament?.balls,
                 winnerTeamId: null,
                 losserTeamId: null,
                 isMatchPlayed: false,
