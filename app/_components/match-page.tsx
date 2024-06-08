@@ -22,15 +22,11 @@ export const MatchPage = memo(function MatchPage() {
 
   const { tournament, matches, matchId, setMatches, setMatchId } = useMain();
 
-  const [showTossChoose, setShowTossChoose] = useState<Boolean>(false);
+  const [showTossChoose, setShowTossChoose] = useState<boolean>(false);
 
   const [match, setMatch] = useState<MatchType | null>(null);
 
-  const handleBackClick = () => {
-    setMatchId(null);
-
-    vibrate();
-  };
+  const [isLoading, setLoading] = useState<boolean>(false);
 
   const handlePlayerTeamClick = (teamId: number) => {
     if (!!matches?.length && !!matchId && !!teamId) {
@@ -46,12 +42,12 @@ export const MatchPage = memo(function MatchPage() {
       });
 
       setMatches(data);
-
-      vibrate();
     }
   };
 
   const handleTossClick = () => {
+    setLoading(true);
+
     if (!!matches?.length && !!matchId && !!match?.playerTeamId) {
       const matchTeamsIds = [match?.teamOneId, match?.teamTwoId];
 
@@ -98,12 +94,14 @@ export const MatchPage = memo(function MatchPage() {
 
         setShowTossChoose(true);
       }
-
-      vibrate();
     }
+
+    setLoading(false);
   };
 
   const handleTossChooseClick = (tossChoose: 'bat' | 'bowl') => {
+    setLoading(true);
+
     if (
       !!matches?.length &&
       !!matchId &&
@@ -135,12 +133,14 @@ export const MatchPage = memo(function MatchPage() {
       setMatches(data);
 
       setShowTossChoose(false);
-
-      vibrate();
     }
+
+    setLoading(false);
   };
 
   const handleRunClick = async (run: number) => {
+    setLoading(true);
+
     if (!!tournament && !!matches?.length && !!matchId && !!match) {
       const oppositeTeamRun: number = Math.floor(Math.random() * 7);
 
@@ -357,12 +357,18 @@ export const MatchPage = memo(function MatchPage() {
           setMatches(data);
         }
       }
-
-      vibrate();
     }
+
+    vibrate();
+
+    setTimeout(() => {
+      setLoading(false);
+    }, 500);
   };
 
   const handleSkipClick = async () => {
+    setLoading(true);
+
     if (!!tournament && !!matches?.length && !!matchId && !!match) {
       const matchTeamsIds = [match?.teamOneId, match?.teamTwoId];
 
@@ -408,9 +414,9 @@ export const MatchPage = memo(function MatchPage() {
       postStorage(String(tournament?.id), data);
 
       setMatches(data);
-
-      vibrate();
     }
+
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -431,7 +437,7 @@ export const MatchPage = memo(function MatchPage() {
     <div className='p-4 pb-20'>
       <div className='flex items-center justify-start gap-2 w-full'>
         {(!match?.playerTeamId || match?.inning === 'over') && (
-          <button className='text-2xl' onClick={handleBackClick}>
+          <button className='text-2xl' onClick={() => setMatchId(null)}>
             <MdKeyboardArrowLeft />
           </button>
         )}
@@ -452,7 +458,8 @@ export const MatchPage = memo(function MatchPage() {
         )}
         {!match?.isMatchPlayed && !match?.playerTeamId && (
           <button
-            className='bg-neutral-800 px-4 py-2 rounded-lg text-sm font-semibold active:bg-neutral-800/50 active:scale-95'
+            className='bg-neutral-800 px-4 py-2 rounded-lg text-sm font-semibold active:bg-neutral-800/50 active:scale-95 disabled:cursor-not-allowed disabled:pointer-events-none disabled:opacity-50'
+            disabled={isLoading}
             onClick={handleSkipClick}
           >
             Skip
@@ -489,7 +496,8 @@ export const MatchPage = memo(function MatchPage() {
       {!!match?.playerTeamId && !match?.tossWinnerTeamId && (
         <div className='flex items-center justify-center w-full'>
           <button
-            className='bg-yellow-500 px-6 py-2 text-2xl font-semibold rounded-lg active:bg-yellow-500/50 active:scale-95'
+            className='bg-yellow-500 px-6 py-2 text-2xl font-semibold rounded-lg active:bg-yellow-500/50 active:scale-95 disabled:cursor-not-allowed disabled:pointer-events-none disabled:opacity-50'
+            disabled={isLoading}
             onClick={handleTossClick}
           >
             Toss
@@ -504,13 +512,15 @@ export const MatchPage = memo(function MatchPage() {
             {showTossChoose && (
               <div className='flex items-center justify-center gap-2 w-full'>
                 <button
-                  className='bg-neutral-800 px-6 py-2 font-semibold rounded-lg active:bg-neutral-800/50 active:scale-95'
+                  className='bg-neutral-800 px-6 py-2 font-semibold rounded-lg active:bg-neutral-800/50 active:scale-95 disabled:cursor-not-allowed disabled:pointer-events-none disabled:opacity-50'
+                  disabled={isLoading}
                   onClick={() => handleTossChooseClick('bat')}
                 >
                   Bat
                 </button>
                 <button
-                  className='bg-neutral-800 px-6 py-2 font-semibold rounded-lg active:bg-neutral-800/50 active:scale-95'
+                  className='bg-neutral-800 px-6 py-2 font-semibold rounded-lg active:bg-neutral-800/50 active:scale-95 disabled:cursor-not-allowed disabled:pointer-events-none disabled:opacity-50'
+                  disabled={isLoading}
                   onClick={() => handleTossChooseClick('bowl')}
                 >
                   Bowl
@@ -524,7 +534,8 @@ export const MatchPage = memo(function MatchPage() {
                   {Array.from({ length: 7 }, (_, index) => (
                     <button
                       key={index}
-                      className='w-16 h-16 text-xl border border-neutral-300 rounded-lg active:bg-neutral-800 active:scale-95'
+                      className='w-16 h-16 text-xl border border-neutral-300 rounded-lg active:bg-neutral-800 active:scale-95 disabled:cursor-not-allowed disabled:pointer-events-none disabled:opacity-50'
+                      disabled={isLoading}
                       onClick={() => handleRunClick(index)}
                     >
                       {index}

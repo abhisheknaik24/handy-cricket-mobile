@@ -1,7 +1,6 @@
 import { MatchType, MatchesType, useMain } from '@/hooks/use-main-store';
 import { usePointsTable } from '@/hooks/use-points-table-store';
 import { useStorage } from '@/hooks/use-storage';
-import { useVibrate } from '@/hooks/use-vibrate';
 import { cn, shuffleArray } from '@/lib/utils';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
@@ -33,8 +32,6 @@ const PointsTable = dynamic(
 export const MatchesPage = memo(function MatchesPage() {
   const { postStorage } = useStorage();
 
-  const { vibrate } = useVibrate();
-
   const {
     tournament,
     teams,
@@ -50,31 +47,7 @@ export const MatchesPage = memo(function MatchesPage() {
   const [totalMatchesPlayedCount, setTotalMatchesPlayedCount] =
     useState<number>(0);
 
-  const [showPointsTable, setShowPointsTable] = useState<Boolean>(false);
-
-  const handleBackClick = () => {
-    setTournament(null);
-
-    vibrate();
-  };
-
-  const handlePointsTableClick = () => {
-    setShowPointsTable((prev) => !prev);
-
-    vibrate();
-  };
-
-  const handlePointsTableClose = () => {
-    setShowPointsTable(false);
-
-    vibrate();
-  };
-
-  const handleMatchClick = (id: number) => {
-    setMatchId(id);
-
-    vibrate();
-  };
+  const [showPointsTable, setShowPointsTable] = useState<boolean>(false);
 
   const handleMatchesSyncClick = async () => {
     if (
@@ -114,10 +87,10 @@ export const MatchesPage = memo(function MatchesPage() {
               teamTwoStatus: null,
               teamOneScore: 0,
               teamOneWickets: 0,
-              teamOneBalls: 30,
+              teamOneBalls: tournament?.balls,
               teamTwoScore: 0,
               teamTwoWickets: 0,
-              teamTwoBalls: 30,
+              teamTwoBalls: tournament?.balls,
               winnerTeamId: null,
               losserTeamId: null,
               isMatchPlayed: false,
@@ -188,10 +161,10 @@ export const MatchesPage = memo(function MatchesPage() {
               teamTwoStatus: null,
               teamOneScore: 0,
               teamOneWickets: 0,
-              teamOneBalls: 30,
+              teamOneBalls: tournament?.balls,
               teamTwoScore: 0,
               teamTwoWickets: 0,
-              teamTwoBalls: 30,
+              teamTwoBalls: tournament?.balls,
               winnerTeamId: null,
               losserTeamId: null,
               isMatchPlayed: false,
@@ -213,10 +186,10 @@ export const MatchesPage = memo(function MatchesPage() {
               teamTwoStatus: null,
               teamOneScore: 0,
               teamOneWickets: 0,
-              teamOneBalls: 30,
+              teamOneBalls: tournament?.balls,
               teamTwoScore: 0,
               teamTwoWickets: 0,
-              teamTwoBalls: 30,
+              teamTwoBalls: tournament?.balls,
               winnerTeamId: null,
               losserTeamId: null,
               isMatchPlayed: false,
@@ -279,10 +252,10 @@ export const MatchesPage = memo(function MatchesPage() {
                 teamTwoStatus: null,
                 teamOneScore: 0,
                 teamOneWickets: 0,
-                teamOneBalls: 30,
+                teamOneBalls: tournament?.balls,
                 teamTwoScore: 0,
                 teamTwoWickets: 0,
-                teamTwoBalls: 30,
+                teamTwoBalls: tournament?.balls,
                 winnerTeamId: null,
                 losserTeamId: null,
                 isMatchPlayed: false,
@@ -317,7 +290,7 @@ export const MatchesPage = memo(function MatchesPage() {
       />
 
       <div className='flex items-center gap-2 py-4'>
-        <button className='text-2xl' onClick={handleBackClick}>
+        <button className='text-2xl' onClick={() => setTournament(null)}>
           <MdKeyboardArrowLeft />
         </button>
         <h3 className='w-1/2 font-bold capitalize truncate'>
@@ -326,7 +299,7 @@ export const MatchesPage = memo(function MatchesPage() {
         {!!matches?.length && (
           <button
             className='w-1/2 bg-neutral-800 p-2 font-semibold rounded-lg truncate active:bg-neutral-800/50 active:scale-95'
-            onClick={handlePointsTableClick}
+            onClick={() => setShowPointsTable((prev) => !prev)}
           >
             Points Table
           </button>
@@ -355,7 +328,7 @@ export const MatchesPage = memo(function MatchesPage() {
                     : 'bg-neutral-800 active:bg-neutral-800/50'
                 )}
                 role='button'
-                onClick={() => handleMatchClick(match?.id)}
+                onClick={() => setMatchId(match?.id)}
               >
                 <div className='flex flex-col items-center justify-center gap-2'>
                   <div className='relative h-16 w-16 bg-white rounded-full'>
@@ -418,7 +391,7 @@ export const MatchesPage = memo(function MatchesPage() {
       )}
 
       {showPointsTable && (
-        <PointsTable handlePointsTableClose={handlePointsTableClose} />
+        <PointsTable handlePointsTableClose={() => setShowPointsTable(false)} />
       )}
     </div>
   );
