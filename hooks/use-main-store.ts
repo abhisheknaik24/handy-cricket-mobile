@@ -42,10 +42,12 @@ export type MatchType = {
 export type MatchesType = Array<MatchType>;
 
 interface MainStore {
+  tournaments: TournamentType[];
   tournament: TournamentType | null;
   teams: TeamsType;
   matches: MatchesType;
   matchId: number | null;
+  setTournaments: (tournaments: TournamentType[]) => void;
   setTournament: (tournament: TournamentType | null) => void;
   setTeams: (teams: TeamsType) => void;
   setMatches: (matches: MatchesType) => void;
@@ -53,10 +55,12 @@ interface MainStore {
 }
 
 export const useMain = create<MainStore>((set) => ({
+  tournaments: [],
   tournament: null,
   teams: [],
   matches: [],
   matchId: null,
+  setTournaments: (tournaments) => set({ tournaments }),
   setTournament: (tournament) => set({ tournament }),
   setTeams: (teams) => set({ teams }),
   setMatches: (matches) => set({ matches }),

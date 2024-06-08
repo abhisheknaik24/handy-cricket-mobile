@@ -28,12 +28,6 @@ export const MatchPage = memo(function MatchPage() {
 
   const [isLoading, setLoading] = useState<boolean>(false);
 
-  const handleBackClick = () => {
-    setMatchId(null);
-
-    vibrate();
-  };
-
   const handlePlayerTeamClick = (teamId: number) => {
     if (!!matches?.length && !!matchId && !!teamId) {
       const data: MatchesType = matches?.map((item) => {
@@ -48,8 +42,6 @@ export const MatchPage = memo(function MatchPage() {
       });
 
       setMatches(data);
-
-      vibrate();
     }
   };
 
@@ -102,8 +94,6 @@ export const MatchPage = memo(function MatchPage() {
 
         setShowTossChoose(true);
       }
-
-      vibrate();
     }
 
     setLoading(false);
@@ -143,8 +133,6 @@ export const MatchPage = memo(function MatchPage() {
       setMatches(data);
 
       setShowTossChoose(false);
-
-      vibrate();
     }
 
     setLoading(false);
@@ -369,9 +357,9 @@ export const MatchPage = memo(function MatchPage() {
           setMatches(data);
         }
       }
-
-      vibrate();
     }
+
+    vibrate();
 
     setTimeout(() => {
       setLoading(false);
@@ -426,8 +414,6 @@ export const MatchPage = memo(function MatchPage() {
       postStorage(String(tournament?.id), data);
 
       setMatches(data);
-
-      vibrate();
     }
 
     setLoading(false);
@@ -451,7 +437,7 @@ export const MatchPage = memo(function MatchPage() {
     <div className='p-4 pb-20'>
       <div className='flex items-center justify-start gap-2 w-full'>
         {(!match?.playerTeamId || match?.inning === 'over') && (
-          <button className='text-2xl' onClick={handleBackClick}>
+          <button className='text-2xl' onClick={() => setMatchId(null)}>
             <MdKeyboardArrowLeft />
           </button>
         )}

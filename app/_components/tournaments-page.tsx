@@ -1,17 +1,23 @@
 import { TournamentType, useMain } from '@/hooks/use-main-store';
 import { useStorage } from '@/hooks/use-storage';
-import { useVibrate } from '@/hooks/use-vibrate';
 import dynamic from 'next/dynamic';
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { GiLaurelsTrophy } from 'react-icons/gi';
 import teams from '../../data/teams.json';
-import tournaments from '../../data/tournaments.json';
 import { Loader } from './loader';
 
 const Header = dynamic(() => import('./header').then((mod) => mod?.Header), {
   loading: () => <Loader />,
   ssr: false,
 });
+
+const AddTournament = dynamic(
+  () => import('./add-tournament').then((mod) => mod?.AddTournament),
+  {
+    loading: () => <Loader />,
+    ssr: false,
+  }
+);
 
 const MatchesPage = dynamic(
   () => import('./matches-page').then((mod) => mod?.MatchesPage),
@@ -24,24 +30,45 @@ const MatchesPage = dynamic(
 export const TournamentsPage = memo(function TournamentsPage() {
   const { getStorage } = useStorage();
 
-  const { vibrate } = useVibrate();
+  const {
+    tournaments,
+    tournament,
+    setTournaments,
+    setTournament,
+    setTeams,
+    setMatches,
+  } = useMain();
 
-  const { tournament, setTournament, setTeams, setMatches } = useMain();
+  const [showAddTournament, setShowAddTournament] = useState<boolean>(false);
 
   const handleTournamentClick = async (tournamentValue: TournamentType) => {
     setTournament(tournamentValue);
 
     const data = await getStorage(String(tournamentValue?.id));
 
-    if (tournamentValue?.teams === 'ipl') {
+    if (tournamentValue?.teams === 'ipl_teams') {
       setTeams(teams?.ipl_teams);
     } else {
       setTeams(teams?.international_teams);
     }
 
     setMatches(data);
+  };
 
-    vibrate();
+  const handleAddTournamentClose = () => {
+    setShowAddTournament(false);
+
+    handleTournamentsSyncClick();
+  };
+
+  const handleTournamentsSyncClick = async () => {
+    const data = await getStorage('tournaments');
+
+    if (!!data?.length) {
+      setTournaments(data);
+    } else {
+      setTournaments([]);
+    }
   };
 
   if (!!tournament?.id) {
@@ -50,11 +77,17 @@ export const TournamentsPage = memo(function TournamentsPage() {
 
   return (
     <div className='p-4'>
-      <Header title='Tournaments' />
+      <Header
+        title='Tournaments'
+        isAddTournamentActive
+        isSyncActive
+        handleAddTournamentClick={() => setShowAddTournament((prev) => !prev)}
+        handleSyncClick={handleTournamentsSyncClick}
+      />
 
-      {!!tournaments?.tournaments?.length && (
+      {!!tournaments?.length && (
         <div className='grid grid-cols-2 gap-2 my-4'>
-          {tournaments?.tournaments?.map((tournament) => (
+          {tournaments?.map((tournament) => (
             <div
               key={tournament?.id}
               className='bg-neutral-800 rounded-lg flex items-center justify-center p-2 active:bg-neutral-800/50 active:scale-95'
@@ -70,6 +103,10 @@ export const TournamentsPage = memo(function TournamentsPage() {
             </div>
           ))}
         </div>
+      )}
+
+      {showAddTournament && (
+        <AddTournament handleAddTournamentClose={handleAddTournamentClose} />
       )}
     </div>
   );
